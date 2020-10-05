@@ -5,6 +5,7 @@ NODE* new_node(NODE_VAL val, int type, int lineno) {
     node->lineno = lineno;
     node->type = type;
 
+    node->child_cnt = 0;
     node->child = NULL;
     node->brother = NULL;
     return node;
@@ -16,7 +17,7 @@ void insert(NODE* parent, NODE* child) {
         parent->child = child;
         parent->child_cnt++;
     } else {
-        wihle(!cur->brother)
+        while(!cur->brother)
             cur = cur->brother;
         cur->child = child;
         cur->child_cnt++;

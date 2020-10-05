@@ -13,7 +13,7 @@ typedef struct NODE {
 
     struct NODE* child;
     struct NODE* brother;
-    int child_cnt = 0;
+    int child_cnt;
 }NODE;
     
 struct NODE* new_node(NODE_VAL val, int type, int lineno);
