@@ -1,21 +1,19 @@
 #pragma once
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
-typedef union {
-    int int_val;
-    float float_val;
-    char char_val;
-    char* string_val;
-}NODE_VAL;
+#include <string.h>
+#include "spl.tab.h"
 typedef struct NODE {
-    NODE_VAL node_val;
+    char* node_val;
     int lineno;
     int type;
+    char* name;
 
     struct NODE* child;
     struct NODE* brother;
-    int child_cnt;
 }NODE;
 void insert(NODE* parent, NODE* child);
-struct NODE* new_node(NODE_VAL val, int type, int lineno);
+void print_tree(NODE* root, int indent);
+struct NODE* new_node(char* name, char* val, int type, int lineno);
 

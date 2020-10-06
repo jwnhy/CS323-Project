@@ -1,0 +1,4 @@
+Error type A at Line 3: Invalid Hex, 0x77G
+Error type A at Line 4: Invalid Hex, 0xCS
+Error type A at Line 7: Invalid Hex Char, '\x6u'
+Error type A at Line 8: Invalid Hex Char, '\x910'
