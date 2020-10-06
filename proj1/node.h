@@ -1,3 +1,4 @@
+#pragma once
 #include <stddef.h>
 #include <stdlib.h>
 typedef union {
@@ -15,6 +16,6 @@ typedef struct NODE {
     struct NODE* brother;
     int child_cnt;
 }NODE;
-    
+void insert(NODE* parent, NODE* child);
 struct NODE* new_node(NODE_VAL val, int type, int lineno);
 
