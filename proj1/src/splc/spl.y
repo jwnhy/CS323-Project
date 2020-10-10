@@ -1,12 +1,10 @@
 %{
     #include "lex.yy.c"
-    #include "node.h"
-    #include "ce.h"
+    #include "../ext/node.h"
+    #include "../ext/ce.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-    const int NON_TER = 0xffff;
-    const int EMPTY = 0xffff-1;
     void yyerror(const char* msg) {  }
     NODE* root;
     extern int err_cnt;
@@ -28,7 +26,7 @@
 %token<node> AND OR NOT 
 %token<node> LP RP LB RB LC RC
 %token<node> BinaryOp_1 BinaryOp_2 BinaryOp_3
-
+%token NON_TER EMPTY
 %type<node> ExpSuffix
 %type<node> Program ExtDecList ExtDef ExtDefList
 %type<node> Specifier StructSpecifier

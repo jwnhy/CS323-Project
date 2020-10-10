@@ -1,22 +1,21 @@
 #include "node.h"
-extern int NON_TER;
-extern int EMPTY;
-NODE *new_node(char *name, char *val, int type, int lineno)
+NODE *new_node(const char *name,const char *val, int type, int lineno)
 {
     NODE *node = (NODE *)malloc(sizeof(NODE));
     if (val)
     {
         char *val_buf;
+        int val_len = strlen(val);
         if (type == CHAR)
         {
             val_buf = (char *)malloc(sizeof(char) * (strlen(val) - 2));
             val++;
-            val[strlen(val) - 1] = '\0';
+            val_len = 1;
         }
         else
             val_buf = (char *)malloc(sizeof(char) * strlen(val));
             
-        strcpy(val_buf, val);
+        strncpy(val_buf, val, val_len);
         node->node_val = val_buf;
     } else {
         node->node_val = NULL;

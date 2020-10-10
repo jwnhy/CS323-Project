@@ -1,8 +1,9 @@
 %option yylineno
 %{
     #include "spl.tab.h"
-    #include "node.h"
-    #include "ce.h"
+    #include "../ext/node.h"
+    #include "../ext/ce.h"
+    extern "C" int yylex();
 %}
 
 alpha [a-zA-Z]
@@ -21,18 +22,19 @@ int "0"|({nonzero}{digit}*)
 %%
 
 "//"  { BEGIN(C_SINGLELINE_COMMENT); }
-<C_SINGLELINE_COMMENT>\n   { BEGIN(INITIAL); }
+<C_SINGLELINE_COMMENT>[\n\t" "]   { BEGIN(INITIAL); }
 <C_SINGLELINE_COMMENT>.    { }
 
 
 "/*"            { BEGIN(C_MULTILINE_COMMENT); }
 <C_MULTILINE_COMMENT>"*/" { BEGIN(INITIAL); }
-<C_MULTILINE_COMMENT>\n   { }
+<C_MULTILINE_COMMENT>[\n\t" "]   { }
 <C_MULTILINE_COMMENT>.    { }
 
 
 \n { }
 [" "\t] { }
+
 "int"|"float"|"char" {
     yylval.node = new_node("TYPE", yytext, TYPE, yylineno);
     return TYPE;

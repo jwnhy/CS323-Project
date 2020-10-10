@@ -1,13 +1,24 @@
-CC=gcc
+CC=g++
 FLEX=flex
 BISON=bison
+splfolder=src/splc
+
+spll=$(splfolder)/spl.l
+sply=$(splfolder)/spl.y
+spllex=$(splfolder)/gen/lex.yy.c
+splsyn=$(splfolder)/gen/spl.tab.c
+splsyndef=$(splfolder)/gen/spl.tab.h
+splsrc=$(splfolder)/ext/ce.c $(splfolder)/ext/node.c $(splfolder)/gen/spl.tab.c 
+splbin=bin/splc
 
 
-.lex: spl.l
-	$(FLEX) spl.l
-.syntax: spl.y
-	$(BISON) -t -d spl.y
-jp: .lex .syntax
-	$(CC) spl.tab.c node.c ce.c -g -lfl -ly -o jp.out
+.lex: $(spll)
+	$(FLEX) -o $(spllex) $(spll) 
+.syntax: $(sply)
+	$(BISON) -o $(splsyn) -t --defines=$(splsyndef) $(sply) 
+splc: .lex .syntax
+	$(CC) $(splsrc) -g -lfl -ly -o $(splbin)
+spp:
+	g++ src/spp/spp.cpp -o bin/spp
 clean:
-	@rm -f lex.yy.c spl.tab.* *.out
+	@rm src/splc/gen/*
