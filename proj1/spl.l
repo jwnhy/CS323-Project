@@ -14,37 +14,57 @@ hexpre (0x)|(0X)
 hexcharpre "\\x"|"\\X"
 nonhex [g-zG-Z]
 alphanum [0-9A-Za-z]
-
 int "0"|({nonzero}{digit}*)
+
+%x C_MULTILINE_COMMENT
+%x C_SINGLELINE_COMMENT
 %%
+
+"//"  { BEGIN(C_SINGLELINE_COMMENT); }
+<C_SINGLELINE_COMMENT>\n   { BEGIN(INITIAL); }
+<C_SINGLELINE_COMMENT>.    { }
+
+
+"/*"            { BEGIN(C_MULTILINE_COMMENT); }
+<C_MULTILINE_COMMENT>"*/" { BEGIN(INITIAL); }
+<C_MULTILINE_COMMENT>\n   { }
+<C_MULTILINE_COMMENT>.    { }
+
+
 \n { }
 [" "\t] { }
 "int"|"float"|"char" {
     yylval.node = new_node("TYPE", yytext, TYPE, yylineno);
     return TYPE;
 }
+
 "struct" {
-    
     yylval.node = new_node("STRUCT", yytext, STRUCT, yylineno);
     return STRUCT;
 }
+
 "if" {
-    
     yylval.node = new_node("IF", yytext, IF, yylineno);
     return IF; 
 }
+
 "else" {
     
     yylval.node = new_node("ELSE", yytext, ELSE, yylineno);
     return ELSE;
 }
+
 "while" {
-    
     yylval.node = new_node("WHILE", yytext, WHILE, yylineno);
     return WHILE;
 }
+
+"for" {
+    yylval.node = new_node("FOR", yytext, FOR, yylineno);
+    return FOR;
+}
+
 "return" {
-    
     yylval.node = new_node("RETURN", yytext, RETURN, yylineno);
     return RETURN;
 }
@@ -225,6 +245,7 @@ int "0"|({nonzero}{digit}*)
     yylval.node = new_node("ID", yytext, ID, yylineno);
     return ID;
 }
+
 
 . {
     add_err(LEX, yylineno, "Invalid Character", yytext);

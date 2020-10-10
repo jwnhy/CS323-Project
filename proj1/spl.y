@@ -20,7 +20,7 @@
 %token<node> INT FLOAT CHAR
 %token<node> ID
 %token<node> TYPE STRUCT
-%token<node> IF ELSE WHILE RETURN
+%token<node> IF ELSE WHILE FOR RETURN
 %token<node> DOT SEMI COMMA
 %token<node> ASSIGN
 %token<node> LT LE GT GE NE EQ
@@ -249,6 +249,18 @@ OpenStmt: IF LP Exp RP Stmt {
     | IF LP Exp error CloseStmt ELSE OpenStmt {
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
+    | FOR LP Exp SEMI Exp SEMI Exp RP OpenStmt {
+        NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
+        insert(cur, $1);
+        insert(cur, $2);
+        insert(cur, $3);
+        insert(cur, $4);
+        insert(cur, $5);
+        insert(cur, $6);
+        insert(cur, $7);
+        insert(cur, $8);
+        insert(cur, $9);
+    }
     | WHILE LP Exp RP OpenStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -263,7 +275,12 @@ OpenStmt: IF LP Exp RP Stmt {
     }
 ;
 
-CloseStmt: Exp SEMI {
+CloseStmt: SEMI {
+        NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
+        insert(cur, $1);
+        $$ = cur;
+    }
+    | Exp SEMI {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -300,6 +317,18 @@ CloseStmt: Exp SEMI {
     }
     | IF LP Exp error CloseStmt ELSE CloseStmt {
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
+    }
+    | FOR LP Exp SEMI Exp SEMI Exp RP CloseStmt {
+        NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
+        insert(cur, $1);
+        insert(cur, $2);
+        insert(cur, $3);
+        insert(cur, $4);
+        insert(cur, $5);
+        insert(cur, $6);
+        insert(cur, $7);
+        insert(cur, $8);
+        insert(cur, $9);
     }
     | WHILE LP Exp RP CloseStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
@@ -344,7 +373,7 @@ DecList: Dec {
         NODE* cur = new_node("DecList", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
-}
+    }
     | Dec COMMA DecList {
         NODE* cur = new_node("DecList", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -490,7 +519,7 @@ ExpSuffix: DOT
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
-    };
+    }
     | ERR {
 
     }
@@ -501,7 +530,7 @@ ExpSuffix: DOT
     | ID LP error ExpSuffix {
         unput(*$4->node_val);
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis.", "");
-    }
+    };
 Args: Exp COMMA Args{
         NODE* cur = new_node("Args", 0, NON_TER, $1->lineno);
         insert(cur, $1);
