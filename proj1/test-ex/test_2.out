@@ -63,4 +63,52 @@ Program (1)
               CompSt (5)
                 LC
                 RC
+            StmtList (6)
+              FOR
+              LP
+              Exp (6)
+                INT: 1
+              SEMI
+              Exp (6)
+                INT: 1
+              SEMI
+              Exp (6)
+                INT: 1
+              RP
+              Stmt (6)
+                CompSt (6)
+                  LC
+                  RC
+              StmtList (7)
+                FOR
+                LP
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  ASSIGN
+                  Exp (7)
+                    INT: 1
+                SEMI
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  LT
+                  Exp (7)
+                    INT: 10
+                SEMI
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  ASSIGN
+                  Exp (7)
+                    Exp (7)
+                      ID: a
+                    PLUS
+                    Exp (7)
+                      INT: 1
+                RP
+                Stmt (7)
+                  CompSt (7)
+                    LC
+                    RC
         RC
