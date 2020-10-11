@@ -2,6 +2,7 @@
     #include "lex.yy.c"
     #include "../ext/node.h"
     #include "../ext/ce.h"
+    #include "../../spp/spp.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
@@ -26,14 +27,16 @@
 %token<node> AND OR NOT 
 %token<node> LP RP LB RB LC RC
 %token<node> BinaryOp_1 BinaryOp_2 BinaryOp_3
-%token NON_TER EMPTY
+%token NON_TER EMPTY END
+
+%type<node> NullableExp
 %type<node> ExpSuffix
 %type<node> Program ExtDecList ExtDef ExtDefList
 %type<node> Specifier StructSpecifier
 %type<node> VarDec FunDec VarList ParamDec
 %type<node> CompSt StmtList CloseStmt OpenStmt Stmt
 %type<node> DecList Dec DefList Def Exp Args
-
+%type<node> EID
 %nonassoc ERR
 %right ASSIGN
 %left OR
@@ -72,9 +75,6 @@ ExtDef: Specifier ExtDecList SEMI {
         insert(cur, $3);
         $$ = cur;
     }
-    | Specifier ExtDecList error SEMI {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
-    }
     | Specifier SEMI {
         NODE* cur = new_node("ExtDef", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -90,10 +90,18 @@ ExtDef: Specifier ExtDecList SEMI {
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
-    };
+    }
+    | Specifier ExtDecList error SEMI {
+        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+    }
+    | Specifier ExtDecList error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        
+    }
     | error FunDec CompSt {
         add_err(SYNTAX, $2->lineno, "Missing Specifier", "");
-    }
+    };
     
 ExtDecList: VarDec {
         NODE* cur = new_node("ExtDecList", 0, NON_TER, $1->lineno);
@@ -106,7 +114,7 @@ ExtDecList: VarDec {
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
-    };
+    }
 
 /* Specifiers */
 Specifier: TYPE {
@@ -114,13 +122,13 @@ Specifier: TYPE {
         insert(cur, $1);
         $$ = cur;
     }
-    | StructSpecifier{
+    | StructSpecifier {
         NODE* cur = new_node("Specifier", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
     };
 
-StructSpecifier: STRUCT ID LC DefList RC {
+StructSpecifier: STRUCT EID LC DefList RC {
         NODE* cur = new_node("StructSpecifier", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -129,7 +137,7 @@ StructSpecifier: STRUCT ID LC DefList RC {
         insert(cur, $5);
         $$ = cur;
     }
-    | STRUCT ID {
+    | STRUCT EID {
         NODE* cur = new_node("StructSpecifier", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -137,7 +145,7 @@ StructSpecifier: STRUCT ID LC DefList RC {
     };
 
 /* Declaration */
-VarDec: ID {
+VarDec: EID {
         NODE* cur = new_node("VarDec", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
@@ -151,7 +159,7 @@ VarDec: ID {
         $$ = cur;
     };
 
-FunDec: ID LP VarList RP {
+FunDec: EID LP VarList RP {
         NODE* cur = new_node("FunDec", 0, NON_TER, $1->lineno);
         fflush(stdout);
         insert(cur, $1);
@@ -160,20 +168,30 @@ FunDec: ID LP VarList RP {
         insert(cur, $4);
         $$ = cur;
     }
-    | ID LP RP {
+    | EID LP RP {
         NODE* cur = new_node("FunDec", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
-    };
-    | ID LP VarList error LC {
+    }
+    | EID LP VarList error LC {
         unput('{');
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
-    | ID LP error LC {
+    | EID LP VarList error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        
+    }
+    | EID LP error LC {
         unput('{');
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+    }
+    | EID LP error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        
     };
 
 VarList: ParamDec COMMA VarList {
@@ -182,6 +200,10 @@ VarList: ParamDec COMMA VarList {
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
+    }
+    | ParamDec COMMA error RP {
+        unput(')');
+        add_err(SYNTAX, $1->lineno, "Extra Comma", "");
     }
     | ParamDec {
         NODE* cur = new_node("VarList", 0, NON_TER, $1->lineno);
@@ -196,7 +218,7 @@ ParamDec: Specifier VarDec {
         $$ = cur;
 }
     | error VarDec {
-        add_err(SYNTAX, $2->lineno, "Missing Semicolon", "");
+        add_err(SYNTAX, $2->lineno, "Missing Specifier", "");
 };
 
 /* Statement */
@@ -220,7 +242,7 @@ StmtList: Stmt StmtList {
 
 Stmt: OpenStmt
     | CloseStmt;
-    
+
 OpenStmt: IF LP Exp RP Stmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -232,6 +254,9 @@ OpenStmt: IF LP Exp RP Stmt {
     }
     | IF LP Exp error Stmt {
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+    }
+    | IF LP error RP Stmt {
+        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
     }
     | IF LP Exp RP CloseStmt ELSE OpenStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
@@ -247,7 +272,10 @@ OpenStmt: IF LP Exp RP Stmt {
     | IF LP Exp error CloseStmt ELSE OpenStmt {
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
-    | FOR LP Exp SEMI Exp SEMI Exp RP OpenStmt {
+    | IF LP error RP CloseStmt ELSE OpenStmt {
+        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
+    }
+    | FOR LP NullableExp SEMI NullableExp SEMI NullableExp RP OpenStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -268,17 +296,14 @@ OpenStmt: IF LP Exp RP Stmt {
         insert(cur, $5);
         $$ = cur;
     }
+    | WHILE LP error RP OpenStmt {
+        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
+    }
     | WHILE LP Exp error OpenStmt {
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
-    }
-;
+    };
 
-CloseStmt: SEMI {
-        NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
-        insert(cur, $1);
-        $$ = cur;
-    }
-    | Exp SEMI {
+CloseStmt: NullableExp SEMI {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -286,6 +311,11 @@ CloseStmt: SEMI {
     }
     | Exp error SEMI {
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+    }
+    | Exp error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        
     }
     | CompSt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
@@ -302,6 +332,11 @@ CloseStmt: SEMI {
     | RETURN Exp error SEMI {     
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
     }
+    | RETURN Exp error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        
+    }
     | IF LP Exp RP CloseStmt ELSE CloseStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -316,7 +351,10 @@ CloseStmt: SEMI {
     | IF LP Exp error CloseStmt ELSE CloseStmt {
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
     }
-    | FOR LP Exp SEMI Exp SEMI Exp RP CloseStmt {
+    | IF LP error RP CloseStmt ELSE CloseStmt {
+        add_err(SYNTAX, $1->lineno, "Missing Expression", "");   
+    }
+    | FOR LP NullableExp SEMI NullableExp SEMI NullableExp RP CloseStmt {
         NODE* cur = new_node("Stmt", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -336,6 +374,9 @@ CloseStmt: SEMI {
         insert(cur, $4);
         insert(cur, $5);
         $$ = cur;
+    }    
+    | WHILE LP error RP CloseStmt {
+        add_err(SYNTAX, $1->lineno, "Missing Expression", "");   
     }
     | WHILE LP Exp error CloseStmt {
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
@@ -366,6 +407,11 @@ Def: Specifier DecList SEMI {
     }
     | Specifier DecList error SEMI {
         add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+    }    
+    | Specifier DecList error RC {
+        unput('}');
+        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        
     };
 DecList: Dec {
         NODE* cur = new_node("DecList", 0, NON_TER, $1->lineno);
@@ -378,7 +424,7 @@ DecList: Dec {
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
-    };
+    }
 Dec: VarDec {
         NODE* cur = new_node("Dec", 0, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -404,7 +450,11 @@ ExpSuffix: DOT
     | OR
     | ASSIGN;
     | SEMI;
-    Exp: Exp BinaryOp_1 Exp {
+
+NullableExp: %empty { $$ = new_node("NullableExp", 0, NON_TER, yylineno);}
+    | Exp;
+
+Exp: Exp BinaryOp_1 Exp {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -461,7 +511,7 @@ ExpSuffix: DOT
         insert(cur, $2);
         $$ = cur;
     }
-    | ID LP Args RP {
+    | EID LP Args RP {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -477,14 +527,14 @@ ExpSuffix: DOT
         insert(cur, $4);
         $$ = cur;
     }
-    | ID LP RP {
+    | EID LP RP {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
     }
-    | Exp DOT ID {
+    | Exp DOT EID {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
@@ -498,7 +548,7 @@ ExpSuffix: DOT
         insert(cur, $3);
         $$ = cur;
     }
-    | ID {
+    | EID {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
@@ -512,21 +562,18 @@ ExpSuffix: DOT
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
-    };
+    }
     | INT {
         NODE* cur = new_node("Exp", 0, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
     }
-    | ERR {
-
-    }
-    | ID LP Args error ExpSuffix {
-        unput(*$5->node_val);
+    | EID LP Args error ExpSuffix {
+        yyless(strlen($5->node_val));
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
-    | ID LP error ExpSuffix {
-        unput(*$4->node_val);
+    | EID LP error ExpSuffix {
+        yyless(strlen($4->node_val));
         add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis.", "");
     };
 Args: Exp COMMA Args{
@@ -541,26 +588,22 @@ Args: Exp COMMA Args{
         insert(cur, $1);
         $$ = cur;
     };
-%%
-
-int main(int argc,char *argv[])
-{    
-    FILE *fin=NULL;
-    extern FILE* yyin;
-    /* extern int yydebug;
-    yydebug = 1; */
-    fin=fopen(argv[1],"r"); 
-    if(fin==NULL)
-    {
-        printf("cannot open reading file.\n");
-        return -1;
+EID: ID
+    | ERR {
+        $$ = new_node("EID", 0, NON_TER, $1->lineno);
     }
-    yyin=fin;
+
+%%
+int main(int argc,char *argv[])
+{
+    auto token = into_lines(std::cin);
+    token = file_inclusion(token);
+    std::string proc_input = to_str(token);
+    yy_switch_to_buffer(yy_scan_string(proc_input.c_str()));
     yyparse();
     if(!is_err())
         print_tree(root, 0);
     else for(int i = 0; i < err_cnt; i++)
         print_err(err_arr+i);
-    fclose(fin);
     return 0;
 }

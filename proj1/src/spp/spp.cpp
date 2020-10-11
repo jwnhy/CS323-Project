@@ -8,14 +8,15 @@ void error(const char *format, const char *msg) {
     exit(1);
 }
 
-list<list<string>> into_lines(fstream &fin) {
+list<list<string>> into_lines(istream &fin) {
     list <list<string>> tokens;
     stringstream token_stream;
     string token_line;
     string token;
     token_stream << fin.rdbuf();
-    fin.close();
     while (getline(token_stream, token_line)) {
+        if(token_line.empty())
+            continue;
         list <string> line = list<string>();
         replace(token_line.begin(), token_line.end(), '\t' , ' ');
         stringstream line_stream(token_line);
@@ -25,38 +26,10 @@ list<list<string>> into_lines(fstream &fin) {
         }
         tokens.push_back(line);
     }
+    tokens.remove_if([](auto x) -> bool { return x.empty(); });
     return tokens;
 }
 
-list<list<string>> read_definition(list<list<string>> lines) {
-    for(auto & line : lines) {
-        auto iter = line.begin();
-        if (*iter == "#define") {
-            string replacement;
-            string macro = *(++iter);
-            if((++iter)!=line.end())
-                replacement = *iter;
-            definitions[macro] = replacement;
-            line.clear();
-        }
-    }
-    lines.remove_if([](auto x) -> bool { return x.empty(); });
-    return lines;
-}
-
-list<list<string>> replace_definition(list<list<string>> lines) {
-    for(auto &line : lines) {
-        for (auto &token : line) {
-            auto iter = definitions.find(token);
-            if (iter != definitions.end()) {
-                string new_token = iter->second;
-                token = new_token;
-            }
-        }
-    }
-    lines.remove_if([](auto x) -> bool { return x.empty(); });
-    return lines;
-}
 list<list<string>> file_inclusion(list<list<string>> lines) {
     for(auto line = lines.begin(); line != lines.end(); line++) {
         string token = (*line).front();
@@ -80,12 +53,13 @@ list<list<string>> file_inclusion(list<list<string>> lines) {
     lines.remove_if([](auto x) -> bool { return x.empty(); });
     return lines;
 }
-
-int main(int argc, char *argv[]) {
-    char *filepath = argv[1];
-    fstream code_file(filepath);
-    list<list<string>> k = into_lines(code_file);
-    k = file_inclusion(k);
-    k = read_definition(k);
-    k = replace_definition(k);
+string to_str(list<list<string>> lines) {
+    string res;
+    for (auto line: lines) {
+        for (auto word: line) {
+            res = res + word + " ";
+        }
+        res += "\n";
+    }
+    return res;
 }

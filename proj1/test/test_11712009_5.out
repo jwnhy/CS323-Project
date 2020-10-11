@@ -1,0 +1,138 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        TYPE: int
+      ExtDecList (1)
+        VarDec (1)
+          ID: a
+      SEMI
+    ExtDefList (1)
+      ExtDef (1)
+        Specifier (1)
+          TYPE: int
+        ExtDecList (1)
+          VarDec (1)
+            ID: b
+        SEMI
+      ExtDefList (1)
+        ExtDef (1)
+          Specifier (1)
+            TYPE: int
+          FunDec (1)
+            ID: love_me
+            LP
+            VarList (1)
+              ParamDec (1)
+                Specifier (1)
+                  TYPE: int
+                VarDec (1)
+                  ID: x
+              COMMA
+              VarList (1)
+                ParamDec (1)
+                  Specifier (1)
+                    TYPE: int
+                  VarDec (1)
+                    ID: a
+            RP
+          CompSt (1)
+            LC
+            RC
+        ExtDefList (1)
+          ExtDef (1)
+            Specifier (1)
+              TYPE: int
+            SEMI
+          ExtDefList (1)
+            ExtDef (1)
+              Specifier (1)
+                StructSpecifier (1)
+                  STRUCT
+                  ID: b
+                  LC
+                  DefList (1)
+                    Def (1)
+                      Specifier (1)
+                        TYPE: int
+                      DecList (1)
+                        Dec (1)
+                          VarDec (1)
+                            ID: c
+                      SEMI
+                  RC
+              SEMI
+            ExtDefList (1)
+              ExtDef (1)
+                Specifier (1)
+                  StructSpecifier (1)
+                    STRUCT
+                    ID: do_you_like_nested_struct
+                    LC
+                    DefList (1)
+                      Def (1)
+                        Specifier (1)
+                          TYPE: int
+                        DecList (1)
+                          Dec (1)
+                            VarDec (1)
+                              ID: a
+                        SEMI
+                      DefList (1)
+                        Def (1)
+                          Specifier (1)
+                            TYPE: float
+                          DecList (1)
+                            Dec (1)
+                              VarDec (1)
+                                ID: b
+                          SEMI
+                        DefList (1)
+                          Def (1)
+                            Specifier (1)
+                              StructSpecifier (1)
+                                STRUCT
+                                ID: c
+                            DecList (1)
+                              Dec (1)
+                                VarDec (1)
+                                  ID: x
+                            SEMI
+                    RC
+                SEMI
+              ExtDefList (1)
+                ExtDef (1)
+                  Specifier (1)
+                    TYPE: int
+                  FunDec (1)
+                    ID: extern_definition
+                    LP
+                    VarList (1)
+                      ParamDec (1)
+                        Specifier (1)
+                          TYPE: int
+                        VarDec (1)
+                          ID: a
+                      COMMA
+                      VarList (1)
+                        ParamDec (1)
+                          Specifier (1)
+                            TYPE: int
+                          VarDec (1)
+                            ID: b
+                    RP
+                  CompSt (1)
+                    LC
+                    DefList (1)
+                      Def (1)
+                        Specifier (1)
+                          TYPE: int
+                        DecList (1)
+                          Dec (1)
+                            VarDec (1)
+                              ID: c
+                            ASSIGN
+                            Exp (1)
+                              CHAR: 'c'
+                        SEMI
+                    RC

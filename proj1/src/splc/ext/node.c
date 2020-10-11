@@ -5,16 +5,8 @@ NODE *new_node(const char *name,const char *val, int type, int lineno)
     if (val)
     {
         char *val_buf;
-        int val_len = strlen(val);
-        if (type == CHAR)
-        {
-            val_buf = (char *)malloc(sizeof(char) * (strlen(val) - 2));
-            val++;
-            val_len = 1;
-        }
-        else
-            val_buf = (char *)malloc(sizeof(char) * strlen(val));
-            
+        int val_len = strlen(val) + 1;
+        val_buf = (char *)malloc(sizeof(char) * val_len);
         strncpy(val_buf, val, val_len);
         node->node_val = val_buf;
     } else {
@@ -47,7 +39,9 @@ void print_node(NODE *node, int indent)
     printf("%*s", indent, "");
     if (node->type == NON_TER)
         printf("%s (%d)", node->name, node->lineno);
-    else if (node->type == TYPE || node->type == INT || node->type == FLOAT || node->type == CHAR || node->type == ID)
+    else if (node->type == TYPE || node->type == INT || node->type == FLOAT || node->type == ID)
+        printf("%s: %s", node->name, node->node_val);
+    else if (node->type == CHAR) 
         printf("%s: %s", node->name, node->node_val);
     else if (node->type != EMPTY)
         printf("%s", node->name);

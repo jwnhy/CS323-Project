@@ -1,0 +1,21 @@
+#include "test-ex/including_1.h"
+/* MULTILINE COMMENT
+
+
+
+
+
+
+
+
+
+
+
+*/
+// SINGLE LINE COMMENT
+int main() {
+    for(a = 1; b < 1;b=b+1) {
+        a = x;
+    }
+    for(;;) {}
+}

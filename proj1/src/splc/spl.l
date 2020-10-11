@@ -4,6 +4,7 @@
     #include "../ext/node.h"
     #include "../ext/ce.h"
     extern "C" int yylex();
+    int EOF_CNT = 0;
 %}
 
 alpha [a-zA-Z]
@@ -22,11 +23,12 @@ int "0"|({nonzero}{digit}*)
 %%
 
 "//"  { BEGIN(C_SINGLELINE_COMMENT); }
-<C_SINGLELINE_COMMENT>[\n\t" "]   { BEGIN(INITIAL); }
+<C_SINGLELINE_COMMENT>\n   { BEGIN(INITIAL); }
+<C_SINGLELINE_COMMENT>[\t" "]   { }
 <C_SINGLELINE_COMMENT>.    { }
 
 
-"/*"            { BEGIN(C_MULTILINE_COMMENT); }
+"/*"  { BEGIN(C_MULTILINE_COMMENT); }
 <C_MULTILINE_COMMENT>"*/" { BEGIN(INITIAL); }
 <C_MULTILINE_COMMENT>[\n\t" "]   { }
 <C_MULTILINE_COMMENT>.    { }

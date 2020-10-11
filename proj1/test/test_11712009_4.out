@@ -1,0 +1,113 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        TYPE: intüÅU
+      FunDec (1)
+        ID: if_and_while
+        LP
+        VarList (1)
+          ParamDec (1)
+            Specifier (1)
+              TYPE: int
+            VarDec (1)
+              ID: a
+          COMMA
+          VarList (1)
+            ParamDec (1)
+              Specifier (1)
+                TYPE: int
+              VarDec (1)
+                ID: b
+        RP
+      CompSt (1)
+        LC
+        StmtList (1)
+          Stmt (1)
+            WHILE
+            LP
+            Exp (1)
+              INT: 1
+            RP
+            Stmt (1)
+              CompSt (1)
+                LC
+                StmtList (1)
+                  Stmt (1)
+                    IF
+                    LP
+                    Exp (1)
+                      INT: 1
+                    RP
+                    Stmt (1)
+                      CompSt (1)
+                        LC
+                        RC
+                    ELSE
+                    Stmt (1)
+                      IF
+                      LP
+                      Exp (1)
+                        INT: 2
+                      RP
+                      Stmt (1)
+                        CompSt (1)
+                          LC
+                          RC
+                  StmtList (1)
+                    Stmt (1)
+                      IF
+                      LP
+                      Exp (1)
+                        INT: 1
+                      RP
+                      Stmt (1)
+                        CompSt (1)
+                          LC
+                          RC
+                      ELSE
+                      Stmt (1)
+                        CompSt (1)
+                          LC
+                          RC
+                RC
+          StmtList (1)
+            Stmt (1)
+              WHILE
+              LP
+              Exp (1)
+                INT: 1
+              RP
+              Stmt (1)
+                IF
+                LP
+                Exp (1)
+                  INT: 1
+                RP
+                Stmt (1)
+                  CompSt (1)
+                    LC
+                    RC
+                ELSE
+                Stmt (1)
+                  IF
+                  LP
+                  Exp (1)
+                    INT: 1
+                  RP
+                  Stmt (1)
+                    CompSt (1)
+                      LC
+                      RC
+            StmtList (1)
+              Stmt (1)
+                IF
+                LP
+                Exp (1)
+                  INT: 1
+                RP
+                Stmt (1)
+                  CompSt (1)
+                    LC
+                    RC
+        RC
