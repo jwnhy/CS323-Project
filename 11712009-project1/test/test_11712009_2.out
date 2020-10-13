@@ -1,0 +1,8 @@
+Error type A at Line 3: Invalid Character, ?
+Error type A at Line 3: Leading Zero Inside Literal, 0123
+Error type A at Line 4: Invalid Character, $
+Error type A at Line 4: Leading Zero Inside Literal, 0x01234
+Error type A at Line 5: Invalid Character, @
+Error type A at Line 5: Invalid Hex Char, '\x02ggg'
+Error type B at Line 6: Missing Expression.
+Error type B at Line 7: Missing Expression.

@@ -1,0 +1,114 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        TYPE: int
+      FunDec (1)
+        ID: main
+        LP
+        RP
+      CompSt (1)
+        LC
+        StmtList (2)
+          FOR
+          LP
+          Exp (2)
+            Exp (2)
+              ID: a
+            ASSIGN
+            Exp (2)
+              INT: 1
+          SEMI
+          Exp (2)
+            Exp (2)
+              ID: b
+            LT
+            Exp (2)
+              INT: 1
+          SEMI
+          Exp (2)
+            Exp (2)
+              ID: b
+            ASSIGN
+            Exp (2)
+              Exp (2)
+                ID: b
+              PLUS
+              Exp (2)
+                INT: 1
+          RP
+          Stmt (2)
+            CompSt (2)
+              LC
+              StmtList (3)
+                Stmt (3)
+                  Exp (3)
+                    Exp (3)
+                      ID: a
+                    ASSIGN
+                    Exp (3)
+                      ID: x
+                  SEMI
+              RC
+          StmtList (5)
+            FOR
+            LP
+            NullableExp (5)
+            SEMI
+            NullableExp (5)
+            SEMI
+            NullableExp (5)
+            RP
+            Stmt (5)
+              CompSt (5)
+                LC
+                RC
+            StmtList (6)
+              FOR
+              LP
+              Exp (6)
+                INT: 1
+              SEMI
+              Exp (6)
+                INT: 1
+              SEMI
+              Exp (6)
+                INT: 1
+              RP
+              Stmt (6)
+                CompSt (6)
+                  LC
+                  RC
+              StmtList (7)
+                FOR
+                LP
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  ASSIGN
+                  Exp (7)
+                    INT: 1
+                SEMI
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  LT
+                  Exp (7)
+                    INT: 10
+                SEMI
+                Exp (7)
+                  Exp (7)
+                    ID: a
+                  ASSIGN
+                  Exp (7)
+                    Exp (7)
+                      ID: a
+                    PLUS
+                    Exp (7)
+                      INT: 1
+                RP
+                Stmt (7)
+                  CompSt (7)
+                    LC
+                    RC
+        RC
