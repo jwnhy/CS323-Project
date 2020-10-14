@@ -4,7 +4,6 @@
     #include "../ext/node.h"
     #include "../ext/ce.h"
     extern "C" int yylex();
-    int EOF_CNT = 0;
 %}
 
 alpha [a-zA-Z]
@@ -38,163 +37,163 @@ int "0"|({nonzero}{digit}*)
 [" "\t] { }
 
 "int"|"float"|"char" {
-    yylval.node = new_node("TYPE", yytext, TYPE, yylineno);
+    yylval.node = new_leaf("TYPE", yytext, TYPE, yylineno);
     return TYPE;
 }
 
 "struct" {
-    yylval.node = new_node("STRUCT", yytext, STRUCT, yylineno);
+    yylval.node = new_leaf("STRUCT", yytext, STRUCT, yylineno);
     return STRUCT;
 }
 
 "if" {
-    yylval.node = new_node("IF", yytext, IF, yylineno);
+    yylval.node = new_leaf("IF", yytext, IF, yylineno);
     return IF; 
 }
 
 "else" {
     
-    yylval.node = new_node("ELSE", yytext, ELSE, yylineno);
+    yylval.node = new_leaf("ELSE", yytext, ELSE, yylineno);
     return ELSE;
 }
 
 "while" {
-    yylval.node = new_node("WHILE", yytext, WHILE, yylineno);
+    yylval.node = new_leaf("WHILE", yytext, WHILE, yylineno);
     return WHILE;
 }
 
 "for" {
-    yylval.node = new_node("FOR", yytext, FOR, yylineno);
+    yylval.node = new_leaf("FOR", yytext, FOR, yylineno);
     return FOR;
 }
 
 "return" {
-    yylval.node = new_node("RETURN", yytext, RETURN, yylineno);
+    yylval.node = new_leaf("RETURN", yytext, RETURN, yylineno);
     return RETURN;
 }
 
 "." {
     
-    yylval.node = new_node("DOT", yytext, DOT, yylineno);
+    yylval.node = new_leaf("DOT", yytext, DOT, yylineno);
     return DOT;
 }
 ";" {
     
-    yylval.node = new_node("SEMI", yytext, SEMI, yylineno);
+    yylval.node = new_leaf("SEMI", yytext, SEMI, yylineno);
     return SEMI;
 }
 "," {
     
-    yylval.node = new_node("COMMA", yytext, COMMA, yylineno);
+    yylval.node = new_leaf("COMMA", yytext, COMMA, yylineno);
     return COMMA;
 }
 "=" {
     
-    yylval.node = new_node("ASSIGN", yytext, ASSIGN, yylineno);
+    yylval.node = new_leaf("ASSIGN", yytext, ASSIGN, yylineno);
     return ASSIGN;
 }
 "<" {
     
-    yylval.node = new_node("LT", yytext, LT, yylineno); 
+    yylval.node = new_leaf("LT", yytext, LT, yylineno); 
     return BinaryOp_1;
 }
 "<=" {
     
-        yylval.node = new_node("LE", yytext, LE, yylineno);
+        yylval.node = new_leaf("LE", yytext, LE, yylineno);
     return BinaryOp_1;
 }
 ">" {
     
-    yylval.node = new_node("GT", yytext, GT, yylineno);
+    yylval.node = new_leaf("GT", yytext, GT, yylineno);
     return BinaryOp_1;
 }
 ">=" {
     
-    yylval.node = new_node("GE", yytext, GE, yylineno);
+    yylval.node = new_leaf("GE", yytext, GE, yylineno);
     return BinaryOp_1;
 }
 "!=" {
     
-    yylval.node = new_node("NE", yytext, NE, yylineno);
+    yylval.node = new_leaf("NE", yytext, NE, yylineno);
     return BinaryOp_1;
     }
 "==" {
     
-    yylval.node = new_node("EQ", yytext, EQ, yylineno);
+    yylval.node = new_leaf("EQ", yytext, EQ, yylineno);
     return BinaryOp_1;
 }
 "+" {
     
-    yylval.node = new_node("PLUS", yytext, PLUS, yylineno);
+    yylval.node = new_leaf("PLUS", yytext, PLUS, yylineno);
     return BinaryOp_2;
 }
 "-" {
     
-    yylval.node = new_node("MINUS", yytext, MINUS, yylineno);
+    yylval.node = new_leaf("MINUS", yytext, MINUS, yylineno);
     return BinaryOp_2;
 }
 "*" {
     
-    yylval.node = new_node("MUL", yytext, MUL, yylineno);
+    yylval.node = new_leaf("MUL", yytext, MUL, yylineno);
     return BinaryOp_3;
 }
 "/" {
     
-    yylval.node = new_node("DIV", yytext, DIV, yylineno);
+    yylval.node = new_leaf("DIV", yytext, DIV, yylineno);
     return BinaryOp_3;
 }
 "&&" {
     
-    yylval.node = new_node("AND", yytext, AND, yylineno);
+    yylval.node = new_leaf("AND", yytext, AND, yylineno);
     return AND;
 }
 "||" {
-    yylval.node = new_node("OR", yytext, OR, yylineno);
+    yylval.node = new_leaf("OR", yytext, OR, yylineno);
     return OR;
 }
 "!" {
     
-    yylval.node = new_node("NOT", yytext, NOT, yylineno);
+    yylval.node = new_leaf("NOT", yytext, NOT, yylineno);
     return NOT;
 }
 "(" {
     
-    yylval.node = new_node("LP", yytext, LP, yylineno);
+    yylval.node = new_leaf("LP", yytext, LP, yylineno);
     return LP;
 }
 ")" {
     
-    yylval.node = new_node("RP", yytext, RP, yylineno);
+    yylval.node = new_leaf("RP", yytext, RP, yylineno);
     return RP;
 }
 "[" {
     
-    yylval.node = new_node("LB", yytext, LB, yylineno);
+    yylval.node = new_leaf("LB", yytext, LB, yylineno);
     return LB;
 }
 "]" {
     
-    yylval.node = new_node("RB", yytext, RB, yylineno);
+    yylval.node = new_leaf("RB", yytext, RB, yylineno);
     return RB;
 }
 "{" {
     
-    yylval.node = new_node("LC", yytext, LC, yylineno);
+    yylval.node = new_leaf("LC", yytext, LC, yylineno);
     return LC;
 }
 "}" {
     
-    yylval.node = new_node("RC", yytext, RC, yylineno);
+    yylval.node = new_leaf("RC", yytext, RC, yylineno);
     return RC;
 }
 
 ({alpha}|_)({alpha}|{digit}|_)* {
-    yylval.node = new_node("ID", yytext, ID, yylineno); 
+    yylval.node = new_leaf("ID", yytext, ID, yylineno); 
     return ID; 
 }
 
 "0"|({nonzero}{digit}*) { 
-    yylval.node = new_node("INT", yytext, INT, yylineno);
+    yylval.node = new_leaf("INT", yytext, INT, yylineno);
     return INT;
 }
 
@@ -202,51 +201,51 @@ int "0"|({nonzero}{digit}*)
     int val = (int)strtol(yytext, NULL, 16);
     char buf[100];
     sprintf(buf, "%d", val);
-    yylval.node = new_node("INT", buf, INT, yylineno);
+    yylval.node = new_leaf("INT", buf, INT, yylineno);
     return INT;
 }
 
 {int}"."{digit}+ {
-    yylval.node = new_node("FLOAT", yytext, FLOAT, yylineno);
+    yylval.node = new_leaf("FLOAT", yytext, FLOAT, yylineno);
     return FLOAT;
 }
 
 '.' { 
-    yylval.node = new_node("CHAR", yytext, CHAR, yylineno);
+    yylval.node = new_leaf("CHAR", yytext, CHAR, yylineno);
     return CHAR;
 }
 '{hexcharpre}({hexdigit}{1,2})' {
-    yylval.node = new_node("CHAR", yytext, CHAR, yylineno);
+    yylval.node = new_leaf("CHAR", yytext, CHAR, yylineno);
     return CHAR;
 }
 
 {hexpre}"0"{alphanum}+ {
     add_err(LEX, yylineno, "Leading Zero Inside Literal", yytext);
-    yylval.node = new_node("INT", 0, INT, yylineno);
+    yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 "0"{digit}+ { 
     add_err(LEX, yylineno, "Leading Zero Inside Literal", yytext);
-    yylval.node = new_node("INT", 0, INT, yylineno);
+    yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 {hexpre}(({nonzerohex}({hexdigit}*{nonhex}+)*)) {
     add_err(LEX, yylineno, "Invalid Hex", yytext);
-    yylval.node = new_node("INT", 0, INT, yylineno);
+    yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 '{hexcharpre}({hexdigit}|{nonhex})*' {
     add_err(LEX, yylineno, "Invalid Hex Char", yytext);
-    yylval.node = new_node("CHAR", 0, CHAR, yylineno);
+    yylval.node = new_leaf("CHAR", 0, CHAR, yylineno);
     return CHAR;
 }
 
 {digit}+({alpha}|_|{digit})+ {
     add_err(LEX, yylineno, "Invalid Identifier", yytext);
-    yylval.node = new_node("ID", yytext, ID, yylineno);
+    yylval.node = new_leaf("ID", yytext, ID, yylineno);
     return ID;
 }
 
