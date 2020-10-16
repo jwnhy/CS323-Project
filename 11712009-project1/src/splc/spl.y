@@ -7,7 +7,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-    void yyerror(const char* msg) {  }
+    void yyerror(const char* msg) { printf("FUCK"); }
     extern int err_cnt;
     extern ERROR err_arr[MAX_ERR];
 %}
@@ -42,7 +42,7 @@
 %left OR
 %left AND
 %left BinaryOp_1
-%left BinaryOp_2
+%left BinaryOp_2 MINUS
 %left BinaryOp_3
 %right UMINUS NOT
 %left LP RP LB RB DOT
@@ -472,6 +472,13 @@ Exp: Exp BinaryOp_1 Exp {
         insert(cur, $3);
         $$ = cur;
     }
+    | Exp MINUS Exp {
+        NODE* cur = new_node("Exp", 2, NON_TER, $1->lineno);
+        insert(cur, $1);
+        insert(cur, $2);
+        insert(cur, $3);
+        $$ = cur;
+    }
     | Exp BinaryOp_3 Exp {
         NODE* cur = new_node("Exp", 3, NON_TER, $1->lineno);
         insert(cur, $1);
@@ -600,6 +607,7 @@ EID: ID
 %%
 int main(int argc,char *argv[])
 {
+
     auto token = into_lines(std::cin);
     token = file_inclusion(token);
     std::string proc_input = to_str(token);
@@ -611,5 +619,6 @@ int main(int argc,char *argv[])
     else for(int i = 0; i < err_cnt; i++)
         print_err(err_arr+i);
     print_symtable();
+
     return 0;
 }

@@ -3,13 +3,15 @@
 #include "../symtable/symtable.h"
 
 struct visitor {
-    static void _type_exist(Type* type, int lineno) {
-        if (type->category == Category::STRUCT &&
-            lookup(type->structure->name, EntryType::TYPE) == NULL) {
-            add_err(SEMANTIC, lineno, "Type not exist",
-                    type->structure->name.c_str());
-            return;
+    static Type* _type_exist(Type* type, int lineno) {
+        if (type->category == Category::STRUCT) {
+            Type* t = lookup(type->structure->name, EntryType::TYPE)->type;
+            if (t == NULL)
+                add_err(SEMANTIC, lineno, "Type not exist",
+                        type->structure->name.c_str());
+            return t;
         }
+        return NULL;
     }
     static std::vector<Field*> _repeat_struct_field(
         std::vector<Field*> fields) {
@@ -68,7 +70,6 @@ struct visitor {
                 insert(new Entry(field));
             }
         } else if (self->rule == 2) {
-            Type* type = specifier(self->children[0]);
             if (type->category == Category::STRUCT) {
                 insert(new Entry(type, self->lineno));
             }
@@ -155,7 +156,7 @@ struct visitor {
     static Field* exp(NODE* self) {
         auto c = self->children;
         auto default_exp =
-            new Field{"Exp", new Type(Primitive::INT), self->lineno};
+            new Field{"LValue", new Type(Primitive::NEXP), self->lineno};
         switch (self->rule) {
             case 0:
                 /* Null Exp */
@@ -184,12 +185,16 @@ struct visitor {
                             "");
                     return default_exp;
                 }
-                return new Field{"Exp", new Type(*oprand_1->type),
+                return new Field{"RValue", new Type(*oprand_1->type),
                                  self->lineno};
             }
             case 4: {
                 auto oprand_1 = exp(c[0]);
                 auto oprand_2 = exp(c[2]);
+                if (oprand_1->name != "LValue") {
+                    add_err(SEMANTIC, self->lineno,
+                            "LHS of assignment is not a LValue", "");
+                }
                 if (!_is_equivalent(oprand_1->type, oprand_2->type)) {
                     std::string msg =
                         to_str(oprand_1->type) + "!=" + to_str(oprand_2->type);
@@ -197,7 +202,7 @@ struct visitor {
                             "Two sides of assignment are not of the same type",
                             msg.c_str());
                 }
-                return new Field{"Exp", new Type(*oprand_1->type),
+                return new Field{"RValue", new Type(*oprand_1->type),
                                  self->lineno};
             }
             case 5:
@@ -222,7 +227,7 @@ struct visitor {
                             "");
                     return default_exp;
                 }
-                return new Field{"Exp", new Type(*oprand_1->type),
+                return new Field{"RValue", new Type(*oprand_1->type),
                                  self->lineno};
             }
             case 7:
@@ -246,7 +251,8 @@ struct visitor {
                             "");
                     return default_exp;
                 }
-                return new Field{"Exp", new Type(*oprand->type), self->lineno};
+                return new Field{"RValue", new Type(*oprand->type),
+                                 self->lineno};
             }
             case 9:
             case 10: {
@@ -277,30 +283,24 @@ struct visitor {
                                          self->lineno};
                     }
                 }
-                return new Field{"Exp", new Type(*func->ret), self->lineno};
+                return new Field{"RValue", new Type(*func->ret), self->lineno};
             }
             case 11: {
-                std::string array_name = id(c[0]);
-                Entry* array_entry = lookup(array_name, EntryType::FIELD);
-                if (array_entry == NULL) {
-                    add_err(SEMANTIC, self->lineno, "Variable not found",
-                            array_name.c_str());
-                    return default_exp;
-                }
-                if (array_entry->field->type->category != Category::ARRAY) {
+                Field* field = exp(c[0]);
+                if (field->type->category != Category::ARRAY) {
                     add_err(SEMANTIC, self->lineno, "Not Array",
-                            array_name.c_str());
+                            field->name.c_str());
                     return default_exp;
                 }
-                Array* arr = array_entry->field->type->array;
+                Array* arr = field->type->array;
                 Field* idx = exp(c[2]);
                 if (idx->type->category != Category::PRIMITIVE ||
                     idx->type->primitive != Primitive::INT) {
                     add_err(SEMANTIC, self->lineno, "Non-INT index",
-                            array_name.c_str());
+                            field->name.c_str());
                     return default_exp;
                 }
-                return new Field{"Exp", new Type(*arr->base), self->lineno};
+                return new Field{"LValue", new Type(*arr->base), self->lineno};
             }
             case 12: {
                 Field* s = exp(c[0]);
@@ -319,12 +319,12 @@ struct visitor {
                             field_name.c_str());
                     return default_exp;
                 }
-                return new Field{"Exp", new Type(*(*field_iter)->type),
+                return new Field{"LValue", new Type(*(*field_iter)->type),
                                  (*field_iter)->lineno};
             }
             case 13: {
                 auto e = exp(c[1]);
-                return new Field{"Exp", new Type(*(e->type)), e->lineno};
+                return new Field{e->name, new Type(*(e->type)), e->lineno};
             }
             case 14: {
                 std::string var_name = id(c[0]);
@@ -334,18 +334,20 @@ struct visitor {
                             "Variable not found in scope", var_name.c_str());
                     return default_exp;
                 }
-                return new Field{*var_entry->field};
+                return new Field{"LValue", new Type(*var_entry->field->type),
+                                 var_entry->field->lineno};
             }
             case 15: {
-                return new Field{"Exp", new Type(Primitive::FLOAT),
+                return new Field{"RValue", new Type(Primitive::FLOAT),
                                  self->lineno};
             }
             case 16: {
-                return new Field{"Exp", new Type(Primitive::CHAR),
+                return new Field{"RValue", new Type(Primitive::CHAR),
                                  self->lineno};
             }
             case 17: {
-                return new Field{"Exp", new Type(Primitive::INT), self->lineno};
+                return new Field{"RValue", new Type(Primitive::INT),
+                                 self->lineno};
             }
         }
         return default_exp;
@@ -400,7 +402,6 @@ struct visitor {
 
         if (self->rule == 1) {
             structure->fields = def_list(self->children[3]);
-
             for (auto repeat_f : _repeat_struct_field(structure->fields)) {
                 add_err(SEMANTIC, repeat_f->lineno,
                         "Repeated field name inside structure",
@@ -418,7 +419,7 @@ struct visitor {
             for (int i = 0; i < head.size() && insert_now; i++) {
                 insert(new Entry(head[i]));
             }
-            auto tail = def_list(self->children[1]);
+            auto tail = def_list(self->children[1], insert_now);
             head.insert(head.end(), tail.begin(), tail.end());
         }
         return head;
@@ -426,8 +427,11 @@ struct visitor {
 
     static std::vector<Field*> def(NODE* self) {
         Type* type = specifier(self->children[0]);
-        _type_exist(type, self->lineno);
-        return dec_list(self->children[1], type);
+        Type* derived = _type_exist(type, self->lineno);
+        if (derived == NULL)
+            return dec_list(self->children[1], type);
+        else
+            return dec_list(self->children[1], derived);
     }
 
     static std::vector<Field*> dec_list(NODE* self, Type* type) {
@@ -456,9 +460,8 @@ struct visitor {
         if (self->rule == 1) {
             return new Field{self->children[0]->node_val, type, self->lineno};
         } else if (self->rule == 2) {
-            return new Field{self->children[0]->node_val,
-                             new Type(new Array{type, _int(self->children[2])}),
-                             self->lineno};
+            return var_dec(self->children[0],
+                           new Type(new Array{type, _int(self->children[2])}));
         } else
             return NULL;
     }

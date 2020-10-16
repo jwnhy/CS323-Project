@@ -1,7 +1,15 @@
-int test_2_r01()
+struct Child
 {
-  int x1 = 5;
-  int x2 = 3;
-  int x4 = x1 + x3;
+  int name;
+  int friends[10];
+};
+struct Child
+{
+	int id;
+  int age;
+};
+int test_2_r15()
+{
+  struct Child Amy;
   return 0;
 }

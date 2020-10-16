@@ -1,0 +1,6 @@
+Error type C at Line 6: Redefinition.
+INT test_2_r15()
+struct Child {
+  INT: name (3)
+  INT[10]: friends (4)
+}

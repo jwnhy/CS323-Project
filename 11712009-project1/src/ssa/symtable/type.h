@@ -3,7 +3,7 @@
 #include <vector>
 #include "../../splc/gen/spl.tab.h"
 enum class Category { PRIMITIVE, ARRAY, STRUCT };
-enum class Primitive { FLOAT = FLOAT, INT = INT, CHAR = CHAR };
+enum class Primitive { FLOAT = FLOAT, INT = INT, CHAR = CHAR, NEXP = -1 };
 
 struct Struct;
 struct Field;

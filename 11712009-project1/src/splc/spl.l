@@ -130,7 +130,7 @@ int "0"|({nonzero}{digit}*)
 "-" {
     
     yylval.node = new_leaf("MINUS", yytext, MINUS, yylineno);
-    return BinaryOp_2;
+    return MINUS;
 }
 "*" {
     

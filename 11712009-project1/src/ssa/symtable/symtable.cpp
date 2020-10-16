@@ -50,6 +50,8 @@ string to_str(Type* type) {
             return "FLOAT";
         else if (type->primitive == Primitive::INT)
             return "CHAR";
+        else if (type->primitive == Primitive::NEXP)
+            return "NON-EXP";
         else
             return to_string(static_cast<int>(type->primitive));
     } else if (type->category == Category::STRUCT) {
