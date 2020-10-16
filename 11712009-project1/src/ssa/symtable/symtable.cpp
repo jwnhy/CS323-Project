@@ -1,26 +1,22 @@
 #include "symtable.h"
 using namespace std;
-vector<SymTable*> scope_stack;
-vector<SymTable*>::iterator stack_top;
+vector<pair<Type*, SymTable*>> scope_stack;
 void init() {
     scope_stack.clear();
     SymTable* global_table = new SymTable();
-    scope_stack.push_back(global_table);
-
-    stack_top = scope_stack.begin();
+    scope_stack.push_back({NULL, global_table});
 }
 
-void enter() {
-    scope_stack.push_back(new SymTable());
-    stack_top++;
+void enter(Type* ret_type) {
+    scope_stack.push_back({ret_type, new SymTable()});
 }
 
 void exit() {
-    stack_top--;
+    scope_stack.pop_back();
 }
 
-void insert(Entry* entry, int lineno) {
-    SymTable* scope = *stack_top;
+void insert(Entry* entry) {
+    SymTable* scope = scope_stack.back().second;
     string name;
     auto iter = scope->find(entry->name());
     if (iter == scope->end()) {
@@ -32,19 +28,19 @@ void insert(Entry* entry, int lineno) {
         if (entry_arr[(int)entry->entry_type] == NULL)
             entry_arr[(int)entry->entry_type] = entry;
         else
-            add_err(SEMANTIC, lineno, "Redefinition", "");
+            add_err(SEMANTIC, entry->lineno, "Redefinition", "");
     }
 }
 
 Entry* lookup(string name, EntryType entry_type) {
-    for (auto scope_iter = stack_top; scope_iter >= scope_stack.begin();
-         scope_iter--) {
-        SymTable* scope = *scope_iter;
+    for (auto scope_iter = scope_stack.end() - 1;
+         scope_iter >= scope_stack.begin(); scope_iter--) {
+        SymTable* scope = (*scope_iter).second;
         auto item = scope->find(name);
         if (item != scope->end())
             return item->second[(int)entry_type];
     }
-    return nullptr;
+    return NULL;
 }
 string to_str(Type* type) {
     if (type->category == Category::PRIMITIVE) {
@@ -52,8 +48,10 @@ string to_str(Type* type) {
             return "INT";
         else if (type->primitive == Primitive::FLOAT)
             return "FLOAT";
-        else
+        else if (type->primitive == Primitive::INT)
             return "CHAR";
+        else
+            return to_string(static_cast<int>(type->primitive));
     } else if (type->category == Category::STRUCT) {
         return "struct " + type->structure->name;
     } else {
@@ -65,7 +63,8 @@ string to_str(Type* type) {
 string to_str(Field* field, int indent = 0) {
     Type* type = field->type;
     string name = field->name;
-    return string(indent, ' ') + to_str(type) + ": " + name;
+    return string(indent, ' ') + to_str(type) + ": " + name + " (" +
+           to_string(field->lineno) + ")";
 }
 
 string to_str(Struct* structure, int indent = 0) {
@@ -102,7 +101,7 @@ void print_entry(Entry* entry, int indent = 0) {
 void print_symtable() {
     int indent = 0;
     for (auto t : scope_stack) {
-        for (auto p : *t) {
+        for (auto p : *t.second) {
             auto entry = p.second;
             print_entry(entry[0], indent);
             print_entry(entry[1], indent);

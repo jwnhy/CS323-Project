@@ -11,11 +11,6 @@ struct Array;
 struct Type;
 struct Func;
 
-struct Array {
-    struct Type* base;
-    int size;
-};
-
 struct Type {
     Category category;
     union {
@@ -37,6 +32,11 @@ struct Type {
     };
 };
 
+struct Array {
+    struct Type* base;
+    int size;
+};
+
 struct Struct {
     std::string name;
     std::vector<Field*> fields;
@@ -45,10 +45,11 @@ struct Struct {
 struct Field {
     std::string name;
     struct Type* type;
+    int lineno;
 };
 
 struct Func {
     std::string name;
     std::vector<Field*> params;
-    Field* ret;
+    Type* ret;
 };

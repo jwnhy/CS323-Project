@@ -152,7 +152,7 @@ int "0"|({nonzero}{digit}*)
     return OR;
 }
 "!" {
-    
+
     yylval.node = new_leaf("NOT", yytext, NOT, yylineno);
     return NOT;
 }

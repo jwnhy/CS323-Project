@@ -192,19 +192,20 @@ FunDec: EID LP VarList RP {
         
     };
 
-VarList: ParamDec COMMA VarList {
+VarList: ParamDec {
         NODE* cur = new_node("VarList", 1, NON_TER, $1->lineno);
+        insert(cur, $1);
+        $$ = cur;
+    }
+    | ParamDec COMMA VarList {
+        NODE* cur = new_node("VarList", 2, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
     }
-    | ParamDec {
-        NODE* cur = new_node("VarList", 2, NON_TER, $1->lineno);
-        insert(cur, $1);
-        $$ = cur;
-    };
-        | ParamDec COMMA error RP {
+
+    | ParamDec COMMA error RP {
         unput(')');
         add_err(SYNTAX, $1->lineno, "Extra Comma", "");
     }
@@ -305,27 +306,26 @@ OpenStmt: IF LP Exp RP Stmt {
     };
 
 CloseStmt: NullableExp SEMI {
-        NODE* cur = new_node("Stmt", 1, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 5, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         $$ = cur;
     }
 
     | CompSt {
-        NODE* cur = new_node("Stmt", 2, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 6, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
     }
     | RETURN Exp SEMI {        
-        NODE* cur = new_node("Stmt", 3, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 7, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
         $$ = cur;
     }
-
     | IF LP Exp RP CloseStmt ELSE CloseStmt {
-        NODE* cur = new_node("Stmt", 4, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 8, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
@@ -337,7 +337,7 @@ CloseStmt: NullableExp SEMI {
     }
 
     | FOR LP NullableExp SEMI NullableExp SEMI NullableExp RP CloseStmt {
-        NODE* cur = new_node("Stmt", 5, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 9, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
@@ -349,7 +349,7 @@ CloseStmt: NullableExp SEMI {
         insert(cur, $9);
     }
     | WHILE LP Exp RP CloseStmt {
-        NODE* cur = new_node("Stmt", 6, NON_TER, $1->lineno);
+        NODE* cur = new_node("Stmt", 10, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
@@ -520,19 +520,19 @@ Exp: Exp BinaryOp_1 Exp {
         insert(cur, $4);
         $$ = cur;
     }
-    | Exp LB Exp RB {
+    | EID LP RP {
         NODE* cur = new_node("Exp", 10, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
-        insert(cur, $4);
         $$ = cur;
     }
-    | EID LP RP {
+    | Exp LB Exp RB {
         NODE* cur = new_node("Exp", 11, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
+        insert(cur, $4);
         $$ = cur;
     }
     | Exp DOT EID {
@@ -554,7 +554,7 @@ Exp: Exp BinaryOp_1 Exp {
         insert(cur, $1);
         $$ = cur;
     }
-    | FLOAT{
+    | FLOAT {
         NODE* cur = new_node("Exp", 15, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
@@ -580,16 +580,16 @@ Exp: Exp BinaryOp_1 Exp {
     | Exp ERR Exp {
         
     };
-Args: Exp COMMA Args{
+Args:Exp {
         NODE* cur = new_node("Args", 1, NON_TER, $1->lineno);
+        insert(cur, $1);
+        $$ = cur;
+    }
+    | Exp COMMA Args{
+        NODE* cur = new_node("Args", 2, NON_TER, $1->lineno);
         insert(cur, $1);
         insert(cur, $2);
         insert(cur, $3);
-        $$ = cur;
-    }
-    | Exp {
-        NODE* cur = new_node("Args", 2, NON_TER, $1->lineno);
-        insert(cur, $1);
         $$ = cur;
     };
 EID: ID

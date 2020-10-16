@@ -21,10 +21,10 @@ ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp
 .syntax: $(sply)
 	$(BISON) -o $(splsyn) -t --defines=$(splsyndef) $(sply) 
 .spp:
-	$(CC) -c $(sppsrc)
+	$(CC) -g -c $(sppsrc)
 	mv *.o obj
 .ssa:
-	$(CC) -c $(ssasrc)
+	$(CC) -g -c $(ssasrc)
 	mv *.o obj
 splc: .lex .syntax .spp .ssa
 	$(CC) $(splsrc) obj/*.o -g -lfl -ly -o $(splbin)
