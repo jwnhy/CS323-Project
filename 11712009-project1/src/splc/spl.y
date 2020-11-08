@@ -7,6 +7,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include <fstream>
     void yyerror(const char* msg) { printf("FUCK"); }
     extern int err_cnt;
     extern ERROR err_arr[MAX_ERR];
@@ -87,18 +88,18 @@ ExtDef: Specifier ExtDecList SEMI {
         $$ = cur;
     }
     | Specifier ExtDecList error SEMI {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
     }
     | Specifier ExtDecList error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
         
     }
     | error SEMI {
-        add_err(SYNTAX, $2->lineno, "Missing Specifier", "");
+        add_err(ErrorType::SYNTAX, $2->lineno, "Missing Specifier", "");
     }
     | error FunDec CompSt {
-        add_err(SYNTAX, $2->lineno, "Missing Specifier", "");
+        add_err(ErrorType::SYNTAX, $2->lineno, "Missing Specifier", "");
     };
     
 ExtDecList: VarDec {
@@ -175,20 +176,20 @@ FunDec: EID LP VarList RP {
     }
     | EID LP VarList error LC {
         unput('{');
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
     | EID LP VarList error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
         
     }
     | EID LP error LC {
         unput('{');
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
     | EID LP error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
         
     };
 
@@ -207,7 +208,7 @@ VarList: ParamDec {
 
     | ParamDec COMMA error RP {
         unput(')');
-        add_err(SYNTAX, $1->lineno, "Extra Comma", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Extra Comma", "");
     }
 
 ParamDec: Specifier VarDec {
@@ -217,7 +218,7 @@ ParamDec: Specifier VarDec {
         $$ = cur;
 }
     | error VarDec {
-        add_err(SYNTAX, $2->lineno, "Missing Specifier", "");
+        add_err(ErrorType::SYNTAX, $2->lineno, "Missing Specifier", "");
 };
 
 /* Statement */
@@ -287,22 +288,22 @@ OpenStmt: IF LP Exp RP Stmt {
         $$ = cur;
     }
     | IF LP Exp error Stmt {
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
     | IF LP error RP Stmt {
-        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Expression", "");
     }
     | IF LP Exp error CloseStmt ELSE OpenStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
     | IF LP error RP CloseStmt ELSE OpenStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Expression", "");
     }
     | WHILE LP error RP OpenStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Expression", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Expression", "");
     }
     | WHILE LP Exp error OpenStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     };
 
 CloseStmt: NullableExp SEMI {
@@ -358,32 +359,32 @@ CloseStmt: NullableExp SEMI {
         $$ = cur;
     }    
     | RETURN Exp error SEMI {     
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");   
     }
     | RETURN Exp error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
         
     }
     | Exp error SEMI {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
     }
     | Exp error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
         
     }
     | IF LP Exp error CloseStmt ELSE CloseStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");   
     }
     | IF LP error RP CloseStmt ELSE CloseStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Expression", "");   
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Expression", "");   
     }
     | WHILE LP error RP CloseStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Expression", "");   
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Expression", "");   
     }
     | WHILE LP Exp error CloseStmt {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");   
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");   
     };
 
 
@@ -407,14 +408,14 @@ Def: Specifier DecList SEMI {
         $$ = cur;
     }
     | error DecList SEMI {
-        add_err(SYNTAX, yylineno, "Missing Specifier", "");
+        add_err(ErrorType::SYNTAX, yylineno, "Missing Specifier", "");
     }
     | Specifier DecList error SEMI {
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
     }    
     | Specifier DecList error RC {
         unput('}');
-        add_err(SYNTAX, $1->lineno, "Missing Semicolon", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Semicolon", "");
         
     };
 DecList: Dec {
@@ -578,11 +579,11 @@ Exp: Exp BinaryOp_1 Exp {
     }
     | EID LP Args error ExpSuffix {
         yyless(strlen($5->node_val));
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis", "");
     }
     | EID LP error ExpSuffix {
         yyless(strlen($4->node_val));
-        add_err(SYNTAX, $1->lineno, "Missing Right Parenthesis.", "");
+        add_err(ErrorType::SYNTAX, $1->lineno, "Missing Right Parenthesis.", "");
     }    
     | Exp ERR Exp {
         
@@ -607,8 +608,10 @@ EID: ID
 %%
 int main(int argc,char *argv[])
 {
+    std::fstream fin;
+    fin.open(argv[1]);
 
-    auto token = into_lines(std::cin);
+    auto token = into_lines(fin);
     token = file_inclusion(token);
     std::string proc_input = to_str(token);
     yy_switch_to_buffer(yy_scan_string(proc_input.c_str()));

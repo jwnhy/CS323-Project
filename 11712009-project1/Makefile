@@ -10,7 +10,7 @@ sply=$(splfolder)/spl.y
 spllex=$(splfolder)/gen/lex.yy.c
 splsyn=$(splfolder)/gen/spl.tab.c
 splsyndef=$(splfolder)/gen/spl.tab.h
-splsrc=$(splfolder)/ext/ce.c $(splfolder)/ext/node.c $(splfolder)/gen/spl.tab.c 
+splsrc=$(splfolder)/ext/ce.cpp $(splfolder)/ext/node.c $(splfolder)/gen/spl.tab.c 
 splbin=bin/splc
 
 sppsrc=$(sppfolder)/spp.cpp

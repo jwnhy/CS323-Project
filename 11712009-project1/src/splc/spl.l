@@ -220,37 +220,37 @@ int "0"|({nonzero}{digit}*)
 }
 
 {hexpre}"0"{alphanum}+ {
-    add_err(LEX, yylineno, "Leading Zero Inside Literal", yytext);
+    add_err(ErrorType::LEX, yylineno, "Leading Zero Inside Literal", yytext);
     yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 "0"{digit}+ { 
-    add_err(LEX, yylineno, "Leading Zero Inside Literal", yytext);
+    add_err(ErrorType::LEX, yylineno, "Leading Zero Inside Literal", yytext);
     yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 {hexpre}(({nonzerohex}({hexdigit}*{nonhex}+)*)) {
-    add_err(LEX, yylineno, "Invalid Hex", yytext);
+    add_err(ErrorType::LEX, yylineno, "Invalid Hex", yytext);
     yylval.node = new_leaf("INT", 0, INT, yylineno);
     return INT;
 }
 
 '{hexcharpre}({hexdigit}|{nonhex})*' {
-    add_err(LEX, yylineno, "Invalid Hex Char", yytext);
+    add_err(ErrorType::LEX, yylineno, "Invalid Hex Char", yytext);
     yylval.node = new_leaf("CHAR", 0, CHAR, yylineno);
     return CHAR;
 }
 
 {digit}+({alpha}|_|{digit})+ {
-    add_err(LEX, yylineno, "Invalid Identifier", yytext);
+    add_err(ErrorType::LEX, yylineno, "Invalid Identifier", yytext);
     yylval.node = new_leaf("ID", yytext, ID, yylineno);
     return ID;
 }
 
 . {
-    add_err(LEX, yylineno, "Invalid Character", yytext);
+    add_err(ErrorType::LEX, yylineno, "Invalid Character", yytext);
     return ERR;
 }
 

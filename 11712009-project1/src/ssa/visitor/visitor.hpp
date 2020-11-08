@@ -7,7 +7,7 @@ struct visitor {
         if (type->category == Category::STRUCT) {
             Type* t = lookup(type->structure->name, EntryType::TYPE)->type;
             if (t == NULL)
-                add_err(SEMANTIC, lineno, "Type not exist",
+                add_err(ErrorType::STRUCT_NO_DEF, lineno, "Type not exist",
                         type->structure->name.c_str());
             return t;
         }
@@ -43,8 +43,8 @@ struct visitor {
                 return false;
         } else if (s1->category == Category::ARRAY &&
                    s2->category == Category::ARRAY)
-            return _is_equivalent(s1->array->base, s2->array->base) &&
-                   s1->array->size == s2->array->size;
+            return s1->array->size == s2->array->size &&
+                   _is_equivalent(s1->array->base, s2->array->base);
         else
             return false;
         return true;
@@ -145,7 +145,8 @@ struct visitor {
             case 7: {
                 Field* ret = exp(c[1]);
                 if (!_is_equivalent(ret->type, ret_type)) {
-                    add_err(SEMANTIC, self->lineno, "Invalid return type", "");
+                    add_err(ErrorType::UNMATCH_RET, self->lineno,
+                            "Invalid return type", "");
                 }
                 break;
             }
@@ -171,7 +172,7 @@ struct visitor {
                 if (category_1 != Category::PRIMITIVE ||
                     category_2 != Category::PRIMITIVE) {
                     add_err(
-                        SEMANTIC, self->lineno,
+                        ErrorType::UNMATCH_OP, self->lineno,
                         "Derived type can not be used in arithemetic operator",
                         "");
                     return default_exp;
@@ -180,7 +181,7 @@ struct visitor {
                 auto primitive_2 = oprand_2->type->primitive;
                 if (primitive_1 == Primitive::CHAR ||
                     primitive_2 == Primitive::CHAR) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "CHAR type can not be used in arithmetic operator",
                             "");
                     return default_exp;
@@ -192,13 +193,13 @@ struct visitor {
                 auto oprand_1 = exp(c[0]);
                 auto oprand_2 = exp(c[2]);
                 if (oprand_1->name != "LValue") {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::RVAL_ON_LEFT, self->lineno,
                             "LHS of assignment is not a LValue", "");
                 }
                 if (!_is_equivalent(oprand_1->type, oprand_2->type)) {
                     std::string msg =
                         to_str(oprand_1->type) + "!=" + to_str(oprand_2->type);
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_ASS, self->lineno,
                             "Two sides of assignment are not of the same type",
                             msg.c_str());
                 }
@@ -213,7 +214,7 @@ struct visitor {
                 auto category_2 = oprand_2->type->category;
                 if (category_1 != Category::PRIMITIVE ||
                     category_2 != Category::PRIMITIVE) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "Derived type can not be used in boolean operator",
                             "");
                     return default_exp;
@@ -222,7 +223,7 @@ struct visitor {
                 auto primitive_2 = oprand_2->type->primitive;
                 if (primitive_1 != Primitive::INT ||
                     primitive_2 != Primitive::INT) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "Only INT type can not be used in boolean operator",
                             "");
                     return default_exp;
@@ -234,19 +235,19 @@ struct visitor {
             case 8: {
                 auto oprand = exp(c[1]);
                 if (oprand->type->category != Category::PRIMITIVE) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "Derived type can not be used in negative operator",
                             "");
                     return default_exp;
                 } else if (self->rule == 7 &&
                            oprand->type->primitive == Primitive::CHAR) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "CHAR type can not be used in negative operator",
                             "");
                     return default_exp;
                 } else if (self->rule == 8 &&
                            oprand->type->primitive != Primitive::INT) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_OP, self->lineno,
                             "Only INT type can be used in negative operator",
                             "");
                     return default_exp;
@@ -259,8 +260,8 @@ struct visitor {
                 std::string func_name = id(c[0]);
                 Entry* func_entry = lookup(func_name, EntryType::FUNC);
                 if (func_entry == NULL) {
-                    add_err(SEMANTIC, self->lineno, "Function not found",
-                            func_name.c_str());
+                    add_err(ErrorType::FUNC_NO_DEF, self->lineno,
+                            "Function not found", func_name.c_str());
                     return default_exp;
                 }
                 Func* func = func_entry->func;
@@ -268,7 +269,7 @@ struct visitor {
                 if (self->rule == 9)
                     arguments = args(c[2]);
                 if (func->params.size() != arguments.size()) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::UNMATCH_PARAM, self->lineno,
                             "Argument number does not equal",
                             func_name.c_str());
                     return new Field{"Exp", new Type(*func->ret), self->lineno};
@@ -276,7 +277,7 @@ struct visitor {
                 for (int i = 0; i < arguments.size(); i++) {
                     if (!_is_equivalent(func->params[i]->type,
                                         arguments[i]->type)) {
-                        add_err(SEMANTIC, self->lineno,
+                        add_err(ErrorType::UNMATCH_PARAM, self->lineno,
                                 "Argument type does not match",
                                 func_name.c_str());
                         return new Field{"Exp", new Type(*func->ret),
@@ -288,7 +289,7 @@ struct visitor {
             case 11: {
                 Field* field = exp(c[0]);
                 if (field->type->category != Category::ARRAY) {
-                    add_err(SEMANTIC, self->lineno, "Not Array",
+                    add_err(ErrorType::NON_ARR, self->lineno, "Not Array",
                             field->name.c_str());
                     return default_exp;
                 }
@@ -296,7 +297,7 @@ struct visitor {
                 Field* idx = exp(c[2]);
                 if (idx->type->category != Category::PRIMITIVE ||
                     idx->type->primitive != Primitive::INT) {
-                    add_err(SEMANTIC, self->lineno, "Non-INT index",
+                    add_err(ErrorType::NON_IDX, self->lineno, "Non-INT index",
                             field->name.c_str());
                     return default_exp;
                 }
@@ -306,8 +307,8 @@ struct visitor {
                 Field* s = exp(c[0]);
                 std::string field_name = id(c[2]);
                 if (s->type->category != Category::STRUCT) {
-                    add_err(SEMANTIC, self->lineno, "Not Structure",
-                            s->name.c_str());
+                    add_err(ErrorType::NON_STRUCT, self->lineno,
+                            "Not Structure", s->name.c_str());
                     return default_exp;
                 }
                 auto fields = s->type->structure->fields;
@@ -315,8 +316,8 @@ struct visitor {
                     fields.begin(), fields.end(),
                     [field_name](Field* x) { return x->name == field_name; });
                 if (field_iter == fields.end()) {
-                    add_err(SEMANTIC, self->lineno, "Field not exist",
-                            field_name.c_str());
+                    add_err(ErrorType::MEM_NO_DEF, self->lineno,
+                            "Field not exist", field_name.c_str());
                     return default_exp;
                 }
                 return new Field{"LValue", new Type(*(*field_iter)->type),
@@ -330,7 +331,7 @@ struct visitor {
                 std::string var_name = id(c[0]);
                 Entry* var_entry = lookup(var_name, EntryType::FIELD);
                 if (var_entry == NULL) {
-                    add_err(SEMANTIC, self->lineno,
+                    add_err(ErrorType::VAR_NO_DEF, self->lineno,
                             "Variable not found in scope", var_name.c_str());
                     return default_exp;
                 }
@@ -403,7 +404,7 @@ struct visitor {
         if (self->rule == 1) {
             structure->fields = def_list(self->children[3]);
             for (auto repeat_f : _repeat_struct_field(structure->fields)) {
-                add_err(SEMANTIC, repeat_f->lineno,
+                add_err(ErrorType::MEM_REDEF, repeat_f->lineno,
                         "Repeated field name inside structure",
                         repeat_f->name.c_str());
             }
@@ -449,7 +450,7 @@ struct visitor {
         if (self->rule == 2) {
             Field* e = exp(self->children[2]);
             if (!_is_equivalent(e->type, type)) {
-                add_err(SEMANTIC, self->lineno,
+                add_err(ErrorType::UNMATCH_ASS, self->lineno,
                         "Two sides of assignment have inconsistent type", "");
             }
         }

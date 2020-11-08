@@ -27,8 +27,22 @@ void insert(Entry* entry) {
         auto& entry_arr = (*iter).second;
         if (entry_arr[(int)entry->entry_type] == NULL)
             entry_arr[(int)entry->entry_type] = entry;
-        else
-            add_err(SEMANTIC, entry->lineno, "Redefinition", "");
+        else {
+            switch (entry->entry_type) {
+                case EntryType::FIELD:
+                    add_err(ErrorType::VAR_REDEF, entry->lineno,
+                            "Variable Redefinition", "");
+                    break;
+                case EntryType::FUNC:
+                    add_err(ErrorType::FUNC_REDEF, entry->lineno,
+                            "Function Redefinition", "");
+                    break;
+                case EntryType::TYPE:
+                    add_err(ErrorType::STRUCT_REDEF, entry->lineno,
+                            "Structure Redefinition", "");
+                    break;
+            }
+        }
     }
 }
 

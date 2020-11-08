@@ -10,6 +10,7 @@
 #include "../../splc/ext/ce.h"
 #include "type.h"
 enum class EntryType { TYPE = 0, FUNC = 1, FIELD = 2 };
+
 struct Entry {
     EntryType entry_type;
     int lineno;
