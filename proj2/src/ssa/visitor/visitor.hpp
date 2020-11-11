@@ -157,7 +157,7 @@ struct visitor {
     static Field* exp(NODE* self) {
         auto c = self->children;
         auto default_exp =
-            new Field{"LValue", new Type(Primitive::NEXP), self->lineno};
+            new Field{"NEXP", new Type(Primitive::NEXP), self->lineno};
         switch (self->rule) {
             case 0:
                 /* Null Exp */
@@ -192,9 +192,9 @@ struct visitor {
             case 4: {
                 auto oprand_1 = exp(c[0]);
                 auto oprand_2 = exp(c[2]);
-                if (oprand_1->name != "LValue") {
+                if (oprand_1->name == "") {
                     add_err(ErrorType::RVAL_ON_LEFT, self->lineno,
-                            "LHS of assignment is not a LValue", "");
+                            "LHS of assignment is not a left value", "");
                 }
                 if (!_is_equivalent(oprand_1->type, oprand_2->type)) {
                     std::string msg =
@@ -203,8 +203,7 @@ struct visitor {
                             "Two sides of assignment are not of the same type",
                             msg.c_str());
                 }
-                return new Field{"RValue", new Type(*oprand_1->type),
-                                 self->lineno};
+                return new Field{"", new Type(*oprand_1->type), self->lineno};
             }
             case 5:
             case 6: {
@@ -228,8 +227,7 @@ struct visitor {
                             "");
                     return default_exp;
                 }
-                return new Field{"RValue", new Type(*oprand_1->type),
-                                 self->lineno};
+                return new Field{"", new Type(*oprand_1->type), self->lineno};
             }
             case 7:
             case 8: {
@@ -252,8 +250,7 @@ struct visitor {
                             "");
                     return default_exp;
                 }
-                return new Field{"RValue", new Type(*oprand->type),
-                                 self->lineno};
+                return new Field{"", new Type(*oprand->type), self->lineno};
             }
             case 9:
             case 10: {
@@ -272,7 +269,8 @@ struct visitor {
                     add_err(ErrorType::UNMATCH_PARAM, self->lineno,
                             "Argument number does not equal",
                             func_name.c_str());
-                    return new Field{"Exp", new Type(*func->ret), self->lineno};
+                    return new Field{"NEXP", new Type(*func->ret),
+                                     self->lineno};
                 }
                 for (int i = 0; i < arguments.size(); i++) {
                     if (!_is_equivalent(func->params[i]->type,
@@ -280,11 +278,11 @@ struct visitor {
                         add_err(ErrorType::UNMATCH_PARAM, self->lineno,
                                 "Argument type does not match",
                                 func_name.c_str());
-                        return new Field{"Exp", new Type(*func->ret),
+                        return new Field{"NEXP", new Type(*func->ret),
                                          self->lineno};
                     }
                 }
-                return new Field{"RValue", new Type(*func->ret), self->lineno};
+                return new Field{"", new Type(*func->ret), self->lineno};
             }
             case 11: {
                 Field* field = exp(c[0]);
@@ -301,7 +299,8 @@ struct visitor {
                             field->name.c_str());
                     return default_exp;
                 }
-                return new Field{"LValue", new Type(*arr->base), self->lineno};
+                return new Field{field->name + "[" + idx->name + "]",
+                                 new Type(*arr->base), self->lineno};
             }
             case 12: {
                 Field* s = exp(c[0]);
@@ -320,7 +319,8 @@ struct visitor {
                             "Field not exist", field_name.c_str());
                     return default_exp;
                 }
-                return new Field{"LValue", new Type(*(*field_iter)->type),
+                return new Field{s->name + "." + field_name,
+                                 new Type(*(*field_iter)->type),
                                  (*field_iter)->lineno};
             }
             case 13: {
@@ -335,20 +335,17 @@ struct visitor {
                             "Variable not found in scope", var_name.c_str());
                     return default_exp;
                 }
-                return new Field{"LValue", new Type(*var_entry->field->type),
+                return new Field{var_name, new Type(*var_entry->field->type),
                                  var_entry->field->lineno};
             }
             case 15: {
-                return new Field{"RValue", new Type(Primitive::FLOAT),
-                                 self->lineno};
+                return new Field{"", new Type(Primitive::FLOAT), self->lineno};
             }
             case 16: {
-                return new Field{"RValue", new Type(Primitive::CHAR),
-                                 self->lineno};
+                return new Field{"", new Type(Primitive::CHAR), self->lineno};
             }
             case 17: {
-                return new Field{"RValue", new Type(Primitive::INT),
-                                 self->lineno};
+                return new Field{"", new Type(Primitive::INT), self->lineno};
             }
         }
         return default_exp;

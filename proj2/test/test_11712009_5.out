@@ -1,0 +1,3 @@
+Error type 10 at Line 2: Not Array.
+Error type 5 at Line 2: Two sides of assignment have inconsistent type.
+Error type 4 at Line 4: Function Redefinition.

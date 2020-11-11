@@ -1,6 +1,0 @@
-int invalid_token_and_missing_exp(int a, int b)
-{
-    int @ = 1;
-    while(){}
-    if(){}
-}

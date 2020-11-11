@@ -1,0 +1,14 @@
+// remove of assumption 5
+// This works perfectly 
+// as there are different layers of symtable
+struct a {
+    int b;
+    int c;
+};
+struct b {
+    int a;
+    int d;
+};
+int main(int a) {
+    struct a f;// This is ok even there is a variable a and a structure a
+}

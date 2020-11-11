@@ -1,0 +1,7 @@
+// remove of assumption 3
+int main(int a, char b) {
+    // this will raise a unmatched type error
+    int c = 'c' + 1;
+    // and this is ok
+    float d = 1.2 + 1;
+}

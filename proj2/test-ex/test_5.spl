@@ -1,0 +1,23 @@
+// remove of assumption 6
+// multiple layer of symtable
+struct a {
+
+};
+int a;
+int a() {
+
+}
+int main(int a) {
+    if (0) {
+        int a;
+        while (1) {
+            int a;
+            {
+                int a;
+            }
+        }
+    }
+    else {
+        int a;
+    }
+}

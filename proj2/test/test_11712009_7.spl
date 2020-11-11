@@ -1,0 +1,7 @@
+struct c {
+
+};
+int main(int a, int b) {
+    struct c f;
+    return f + a;
+}

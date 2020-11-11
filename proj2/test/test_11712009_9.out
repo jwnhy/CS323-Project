@@ -1,0 +1,3 @@
+Error type 1 at Line 5: Variable not found in scope.
+Error type 13 at Line 5: Not Structure.
+Error type 8 at Line 5: Invalid return type.

@@ -618,10 +618,11 @@ int main(int argc,char *argv[])
     yyparse();
     semantic_analysis(get_root());
     if(!is_err())
-        print_tree(get_root(), 0);
+    ;
+        //print_tree(get_root(), 0);
     else for(int i = 0; i < err_cnt; i++)
         print_err(err_arr+i);
-    print_symtable();
+    //print_symtable();
 
     return 0;
 }

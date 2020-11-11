@@ -1,0 +1,2 @@
+Error type 7 at Line 3: CHAR type can not be used in arithmetic operator.
+Error type 5 at Line 3: Two sides of assignment have inconsistent type.

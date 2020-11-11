@@ -1,0 +1,8 @@
+Error type 7 at Line 3: Only INT type can not be used in boolean operator.
+Error type 5 at Line 3: Two sides of assignment have inconsistent type.
+Error type 7 at Line 4: Only INT type can not be used in boolean operator.
+Error type 5 at Line 4: Two sides of assignment have inconsistent type.
+Error type 7 at Line 5: Only INT type can be used in negative operator.
+Error type 5 at Line 5: Two sides of assignment have inconsistent type.
+Error type 7 at Line 6: Only INT type can be used in negative operator.
+Error type 5 at Line 6: Two sides of assignment have inconsistent type.

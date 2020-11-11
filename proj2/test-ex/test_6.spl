@@ -1,0 +1,18 @@
+// removal of assumption 7
+// this is ok thanks to structural equvialence
+struct e {
+        int e[3];
+    };
+struct b {
+    int c;
+    struct e f;
+};
+struct a {
+    int a;
+    struct e e;
+};
+int main() {
+    struct a a;
+    struct b b;
+    a = b;
+}

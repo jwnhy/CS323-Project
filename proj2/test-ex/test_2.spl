@@ -1,0 +1,12 @@
+// remove of assumption 2
+int main(int a, char b) {
+    int d = 1 || 'c'; 
+    int c = 2 && 1.2;
+    int f = !1.2;
+    int e = !'f';
+    // these all will report unmatched type as only int can do boolean
+    // and unmatched type as the R.H.S will evaluated to an error
+
+    // but int itself is fine
+    int k = 1 && 2;
+}

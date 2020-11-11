@@ -51,7 +51,7 @@ Entry* lookup(string name, EntryType entry_type) {
          scope_iter >= scope_stack.begin(); scope_iter--) {
         SymTable* scope = (*scope_iter).second;
         auto item = scope->find(name);
-        if (item != scope->end())
+        if (item != scope->end() && item->second[(int)entry_type])
             return item->second[(int)entry_type];
     }
     return NULL;

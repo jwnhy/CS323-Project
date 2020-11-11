@@ -1,0 +1,6 @@
+// remove of assumption 1
+int main(int a, char b) {
+    int d = 1 + 'c'; 
+    // this will report unmatched type
+    // and unmatched type as the R.H.S will evaluated to an error
+}

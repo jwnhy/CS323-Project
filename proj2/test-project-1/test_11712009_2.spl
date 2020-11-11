@@ -1,8 +1,0 @@
-int token_and_coruppted_hex(int a, int b)
-{
-    int ? = 0123;
-    int $ = 0x01234;
-    int @ = '\x02ggg';
-    while(){}
-    if(){}
-}
