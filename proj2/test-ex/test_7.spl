@@ -1,0 +1,5 @@
+// test of redefinition of member
+struct b {
+    int a;
+    int a;
+};

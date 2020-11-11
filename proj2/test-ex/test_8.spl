@@ -1,0 +1,7 @@
+// test for detection of undefined structure
+struct a {
+    struct nonexist a;
+};
+int main() {
+    struct f b;
+}

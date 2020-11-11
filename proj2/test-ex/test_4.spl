@@ -4,10 +4,12 @@
 struct a {
     int b;
     int c;
+    int a;
 };
 struct b {
     int a;
     int d;
+    int e;
 };
 int main(int a) {
     struct a f;// This is ok even there is a variable a and a structure a

@@ -17,8 +17,12 @@ sppsrc=$(sppfolder)/spp.cpp
 
 ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp
 .lex: $(spll)
+	-@mkdir obj ||:
+	-@mkdir $(splfolder)/gen ||:
 	$(FLEX) -o $(spllex) $(spll) 
 .syntax: $(sply)
+	-@mkdir obj ||:
+	-@mkdir $(splfolder)/gen ||:
 	$(BISON) -o $(splsyn) -t --defines=$(splsyndef) $(sply) 
 .spp:
 	$(CC) -g -c $(sppsrc)
@@ -27,6 +31,7 @@ ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp
 	$(CC) -g -c $(ssasrc)
 	mv *.o obj
 splc: .lex .syntax .spp .ssa
+	-@mkdir bin ||:
 	$(CC) $(splsrc) obj/*.o -g -lfl -ly -o $(splbin)
 clean:
-	@rm src/splc/gen/* bin/* obj/*
+	-@rm src/splc/gen/* bin/* obj/* ||:

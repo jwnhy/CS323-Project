@@ -5,11 +5,13 @@
 struct visitor {
     static Type* _type_exist(Type* type, int lineno) {
         if (type->category == Category::STRUCT) {
-            Type* t = lookup(type->structure->name, EntryType::TYPE)->type;
-            if (t == NULL)
+            Entry* t = lookup(type->structure->name, EntryType::TYPE);
+            if (t == NULL) {
                 add_err(ErrorType::STRUCT_NO_DEF, lineno, "Type not exist",
                         type->structure->name.c_str());
-            return t;
+                return NULL;
+            }
+            return t->type;
         }
         return NULL;
     }
