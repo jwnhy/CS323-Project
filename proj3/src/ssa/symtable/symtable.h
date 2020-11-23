@@ -30,12 +30,12 @@ struct Entry {
         : type(type), lineno(lineno), entry_type(EntryType::TYPE), id(CNT++) {}
     std::string name() {
         if (this->entry_type == EntryType::FIELD)
-            return this->field->name;
+            return this->field->name + "_" + std::to_string(id);
         else if (this->entry_type == EntryType::FUNC)
-            return this->func->name;
+            return this->func->name + "_" + std::to_string(id);
         else if (this->entry_type == EntryType::TYPE &&
                  this->type->category == Category::STRUCT)
-            return this->type->structure->name;
+            return this->type->structure->name + "_" + std::to_string(id);
         else
             return "";
     }
