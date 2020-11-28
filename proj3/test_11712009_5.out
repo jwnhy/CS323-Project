@@ -3,7 +3,7 @@ PARAM va_1
 PARAM vb_2
 vc_4 := #0
 vc_4 := #1
-IF vc_3 != #0 GOTO l_5
+IF #1 != #0 GOTO l_5
 GOTO l_6
 LABEL l_5 :
 RETURN #0
