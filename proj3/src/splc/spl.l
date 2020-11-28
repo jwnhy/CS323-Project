@@ -143,7 +143,6 @@ int "0"|({nonzero}{digit}*)
     return BinaryOp_3;
 }
 "&&" {
-    
     yylval.node = new_leaf("AND", yytext, AND, yylineno);
     return AND;
 }

@@ -28,14 +28,25 @@ struct Entry {
         : func(func), lineno(lineno), entry_type(EntryType::FUNC), id(CNT++) {}
     Entry(Type* type, int lineno)
         : type(type), lineno(lineno), entry_type(EntryType::TYPE), id(CNT++) {}
-    std::string name() {
+    std::string original_name() {
         if (this->entry_type == EntryType::FIELD)
-            return this->field->name + "_" + std::to_string(id);
+            return this->field->name;
         else if (this->entry_type == EntryType::FUNC)
-            return this->func->name + "_" + std::to_string(id);
+            return this->func->name;
         else if (this->entry_type == EntryType::TYPE &&
                  this->type->category == Category::STRUCT)
-            return this->type->structure->name + "_" + std::to_string(id);
+            return this->type->structure->name;
+        else
+            return "";
+    }
+    std::string name() {
+        if (this->entry_type == EntryType::FIELD)
+            return "v" + this->field->name + "_" + std::to_string(id);
+        else if (this->entry_type == EntryType::FUNC)
+            return "v" + this->func->name + "_" + std::to_string(id);
+        else if (this->entry_type == EntryType::TYPE &&
+                 this->type->category == Category::STRUCT)
+            return "v" + this->type->structure->name + "_" + std::to_string(id);
         else
             return "";
     }
@@ -50,4 +61,6 @@ std::string to_str(Func* func, int);
 std::string to_str(Field* field, int);
 std::string to_str(Struct* type, int);
 std::string to_str(Type* type);
+std::string temp_var();
+std::string temp_label();
 Entry* lookup(std::string name, EntryType entry_type);

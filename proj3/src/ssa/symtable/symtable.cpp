@@ -20,11 +20,11 @@ void exit() {
 void insert(Entry* entry) {
     SymTable* scope = scope_stack.back().second;
     string name;
-    auto iter = scope->find(entry->name());
+    auto iter = scope->find(entry->original_name());
     if (iter == scope->end()) {
         array<Entry*, 3> entry_arr{0, 0, 0};
         entry_arr[(int)entry->entry_type] = entry;
-        scope->insert({entry->name(), entry_arr});
+        scope->insert({entry->original_name(), entry_arr});
     } else {
         auto& entry_arr = (*iter).second;
         if (entry_arr[(int)entry->entry_type] == NULL)
@@ -77,7 +77,12 @@ string to_str(Type* type) {
                "]";
     }
 }
-
+std::string temp_var() {
+    return "t_" + std::to_string(CNT++);
+}
+std::string temp_label() {
+    return "l_" + std::to_string(CNT++);
+}
 string to_str(Field* field, int indent = 0) {
     Type* type = field->type;
     string name = field->name;

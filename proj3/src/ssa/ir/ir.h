@@ -3,8 +3,7 @@
 #include <vector>
 struct IR;
 enum class IRType;
-extern std::vector<IR> IRList;
-
+typedef std::vector<IR> IRList;
 enum class IRType {
     LABEL,
     FUNCTION,
@@ -71,5 +70,6 @@ struct IR {
             case IRType::WRITE:
                 return "WRITE " + args[0];
         }
+        return "";
     }
 };

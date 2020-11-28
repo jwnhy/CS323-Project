@@ -1,5 +1,5 @@
 SHELL=/usr/bin/zsh
-CC=g++ 
+CC=g++ -std=c++17
 FLEX=flex
 BISON=bison
 splfolder=src/splc
@@ -16,7 +16,7 @@ splbin=bin/splc
 
 sppsrc=$(sppfolder)/spp.cpp
 
-ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp
+ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp $(ssafolder)/ir/*.cpp
 .lex: $(spll)
 	-@mkdir obj ||:
 	-@mkdir $(splfolder)/gen ||:

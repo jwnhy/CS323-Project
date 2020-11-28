@@ -1,0 +1,7 @@
+int extern_definition(int a, int b)
+{
+    int c = 1;
+    if(c) {
+        return 0;
+    }
+}

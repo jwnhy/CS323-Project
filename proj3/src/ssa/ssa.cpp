@@ -1,5 +1,5 @@
 #include "ssa.h"
 
-void semantic_analysis(NODE* root) {
-    visitor::program(root);
+IRList semantic_analysis(NODE* root) {
+    return visitor::program(root);
 }
