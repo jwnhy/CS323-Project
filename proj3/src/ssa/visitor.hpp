@@ -144,9 +144,9 @@ struct visitor {
         std::string name = id(self->children[0]);
         IRList irs;
         auto param_list = std::vector<Field*>();
+        irs.push_back(IR{IRType::FUNCTION, {name}});
         if (self->rule == 1) {
             param_list = var_list(self->children[2]);
-            irs.push_back(IR{IRType::FUNCTION, {name}});
             for (auto param : param_list) {
                 _type_exist(param->type, param->lineno);
             }
@@ -319,7 +319,10 @@ struct visitor {
                 /* Translation Part */
                 irs = extend(irs, irs_1);
                 irs = extend(irs, irs_2);
-                irs.push_back(IR{IRType::ASSIGN, {t_1, t_2}});
+                if (t_1.at(0) == 'd')
+                    irs.push_back(IR{IRType::LDEREF, {t_1.substr(2), t_2}});
+                else
+                    irs.push_back(IR{IRType::ASSIGN, {t_1, t_2}});
                 irs = _if_stmt(irs, t_1, "!=", "#0", lb_t, lb_f);
                 return {new Field{"", new Type(*oprand_1->type), self->lineno},
                         irs, t_1};
@@ -372,9 +375,9 @@ struct visitor {
                 /* Init Part */
                 std::tuple<Field*, IRList, std::string> tp_1;
                 if (self->rule == 8)
-                    tp_1 = exp(c[0], {lb_f, lb_t});
+                    tp_1 = exp(c[1], {lb_f, lb_t});
                 else {
-                    tp_1 = exp(c[0]);
+                    tp_1 = exp(c[1]);
                 }
                 auto [oprand_1, irs_1, t_1] = tp_1;
                 /* SSA Part */
@@ -421,6 +424,24 @@ struct visitor {
                 std::tuple<std::vector<std::pair<Field*, std::string>>, IRList>
                     tp_1;
                 std::string func_name = id(c[0]);
+                /* Special Care for R/W function */
+                if (func_name == "read") {
+                    /* Args -> Arg -> Exp */
+                    auto temp = temp_var();
+                    irs.push_back(IR{IRType::READ, {temp}});
+                    return {
+                        new Field{"", new Type(Primitive::INT), self->lineno},
+                        irs, temp};
+                } else if (func_name == "write") {
+                    auto [arguments, irs_1] = args(c[2]);
+                    irs = extend(irs, irs_1);
+                    for (auto arg : arguments) {
+                        irs.push_back(IR{IRType::WRITE, {arg.second}});
+                    }
+                    return {
+                        new Field{"", new Type(Primitive::INT), self->lineno},
+                        irs, "#" + std::to_string(arguments.size())};
+                }
                 /* SSA Part */
                 Entry* func_entry = lookup(func_name, EntryType::FUNC);
                 if (func_entry == NULL) {
@@ -456,10 +477,15 @@ struct visitor {
                 irs = extend(irs, irs_1);
                 for (auto arg = arguments.rbegin(); arg != arguments.rend();
                      arg++) {
-                    irs.push_back(IR{IRType::ARG, {arg->second}});
+                    if (arg->first->type->category != Category::PRIMITIVE) {
+                        irs.push_back(IR{IRType::ARG, {arg->second.substr(2)}});
+                    } else {
+                        irs.push_back(IR{IRType::ARG, {arg->second}});
+                    }
                 }
                 auto t = temp_var();
-                irs.push_back(IR{IRType::CALL, {t, func_entry->name()}});
+                irs.push_back(
+                    IR{IRType::CALL, {t, func_entry->original_name()}});
                 return {new Field{"", new Type(*func->ret), self->lineno}, irs,
                         t};
             }
@@ -481,21 +507,24 @@ struct visitor {
                     return {default_exp, irs, ""};
                 }
                 /* Translation Part */
+                if (t_1.at(0) == 'd')
+                    t_1 = t_1.substr(2);
                 irs = extend(irs, irs_1);
-                auto ret = temp_var(), t_idx = temp_var();
-                int arr_size = _type_size(arr);
-                irs.push_back(
-                    IR{IRType::MUL, {t_2, std::to_string(arr_size), t_2}});
-                irs.push_back(IR{IRType::ADD, {t_idx, t_1, t_2}});
-                irs.push_back(IR{IRType::RDEREF, {ret, t_idx}});
-                irs = _if_stmt(irs, ret, "!=", "#0", lb_t, lb_f);
+                auto ret = temp_pointer(), t_idx = temp_var();
+                auto val = "d_" + ret;
+                int arr_size = _type_size(arr->base);
+                irs.push_back(IR{IRType::MUL,
+                                 {t_idx, "#" + std::to_string(arr_size), t_2}});
+                irs.push_back(IR{IRType::ADD, {ret, t_1, t_idx}});
+                irs.push_back(IR{IRType::RDEREF, {val, ret}});
+                irs = _if_stmt(irs, val, "!=", "#0", lb_t, lb_f);
                 return {new Field{field->name + "[" + idx->name + "]",
                                   new Type(*arr->base), self->lineno},
-                        irs, ret};
+                        irs, val};
             }
             case 12: {
                 /* Init Part */
-                auto [s, irs_1, t_1](exp(c[0]));
+                auto [s, irs_1, t_1] = exp(c[0]);
                 std::string field_name = id(c[2]);
                 /* SSA Part */
                 if (s->type->category != Category::STRUCT) {
@@ -513,6 +542,8 @@ struct visitor {
                     return {default_exp, irs, ""};
                 }
                 /* Translation Part */
+                if (t_1.at(0) == 'd')
+                    t_1 = t_1.substr(2);
                 irs = extend(irs, irs_1);
                 int offset = 0;
                 for (auto f : fields) {
@@ -520,18 +551,19 @@ struct visitor {
                         break;
                     offset += _type_size(f->type);
                 }
-                auto ret = temp_var(), t_idx = temp_var();
+                auto ret = temp_pointer();
+                auto val = "d_" + ret;
                 irs.push_back(
-                    IR{IRType::ADD, {t_idx, t_1, std::to_string(offset)}});
-                irs.push_back(IR{IRType::RDEREF, {ret, t_idx}});
-                irs = _if_stmt(irs, ret, "!=", "#0", lb_t, lb_f);
+                    IR{IRType::ADD, {ret, t_1, "#" + std::to_string(offset)}});
+                irs.push_back(IR{IRType::RDEREF, {val, ret}});
+                irs = _if_stmt(irs, val, "!=", "#0", lb_t, lb_f);
                 return {new Field{s->name + "." + field_name,
                                   new Type(*(*field_iter)->type),
                                   (*field_iter)->lineno},
-                        irs, ret};
+                        irs, val};
             }
             case 13: {
-                auto [e, irs_1, t_1](exp(c[0]));
+                auto [e, irs_1, t_1] = exp(c[1]);
                 irs = extend(irs, irs_1);
                 irs = _if_stmt(irs, t_1, "!=", "#0", lb_t, lb_f);
                 return {new Field{e->name, new Type(*(e->type)), e->lineno},
@@ -603,7 +635,7 @@ struct visitor {
     }
 
     static Field* param_dec(NODE* self) {
-        Type* type = specifier(self->children[0]);
+        Type* type = _type_exist(specifier(self->children[0]), self->lineno);
         return var_dec(self->children[1], type);
     }
 
@@ -649,6 +681,7 @@ struct visitor {
             auto [vars, irs] = def(self->children[0]);
             for (int i = 0; i < vars.size(); i++) {
                 auto [field, t] = vars[i];
+                head = {field};
                 if (insert_now) {
                     auto entry = new Entry(field);
                     insert(entry);
@@ -699,8 +732,6 @@ struct visitor {
                         "type",
                         "");
             }
-            Entry* entry = new Entry(field);
-            insert(entry);
             irs = extend(irs, irs_1);
             return {field, irs, t};
         }

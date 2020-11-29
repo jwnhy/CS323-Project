@@ -83,6 +83,9 @@ std::string temp_var() {
 std::string temp_label() {
     return "l_" + std::to_string(CNT++);
 }
+std::string temp_pointer() {
+    return "p_" + std::to_string(CNT++);
+}
 string to_str(Field* field, int indent = 0) {
     Type* type = field->type;
     string name = field->name;

@@ -9,6 +9,7 @@ void add_err(ErrorType type, int lineno, const char* msg, const char* token) {
     err->lineno = lineno;
     err->msg = msg;
     err->token = token_buf;
+    print_err(err);
 }
 
 void print_err(const ERROR* err) {

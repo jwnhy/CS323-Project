@@ -588,7 +588,7 @@ Exp: Exp BinaryOp_1 Exp {
     | Exp ERR Exp {
         
     };
-Args:Exp {
+Args: Exp {
         NODE* cur = new_node("Args", 1, NON_TER, $1->lineno);
         insert(cur, $1);
         $$ = cur;
@@ -621,6 +621,8 @@ int main(int argc,char *argv[])
     std::string proc_input = to_str(token);
     yy_switch_to_buffer(yy_scan_string(proc_input.c_str()));
     yyparse();
+    for(int i = 0; i < err_cnt; i++)
+        print_err(err_arr+i);
     IRList irs = semantic_analysis(get_root());
     for (auto i : irs) {
         std::cout << i.str() << std::endl;

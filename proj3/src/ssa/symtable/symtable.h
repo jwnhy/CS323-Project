@@ -63,4 +63,5 @@ std::string to_str(Struct* type, int);
 std::string to_str(Type* type);
 std::string temp_var();
 std::string temp_label();
+std::string temp_pointer();
 Entry* lookup(std::string name, EntryType entry_type);
