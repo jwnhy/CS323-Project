@@ -34,25 +34,22 @@ struct visitor {
         }
         return irs;
     }
-    static IRList extend(IRList irs_a, IRList irs_b) {
-        irs_a.insert(irs_a.end(), irs_b.begin(), irs_b.end());
-        return irs_a;
-    }
-    static IR trans_dec(Entry* entry) {
+    static IRList trans_dec(Entry* entry) {
         auto type = entry->field->type;
+
         switch (type->category) {
             case Category::PRIMITIVE:
-                return IR{IRType::ASSIGN, {entry->name(), "#0"}};
+                break;
             case Category::ARRAY:
-                return IR{
-                    IRType::ALLOC,
-                    {entry->name(), std::to_string(_type_size(type->array))}};
+                return {IR{IRType::ALLOC,
+                           {entry->name().substr(1),
+                            std::to_string(_type_size(type->array))}}};
             case Category::STRUCT:
-                return IR{IRType::ALLOC,
-                          {entry->name(),
-                           std::to_string(_type_size(type->structure))}};
+                return {IR{IRType::ALLOC,
+                           {entry->name().substr(1),
+                            std::to_string(_type_size(type->structure))}}};
         }
-        return IR{};
+        return {};
     }
     static Type* _type_exist(Type* type, int lineno) {
         if (type->category == Category::STRUCT) {
@@ -64,7 +61,7 @@ struct visitor {
             }
             return t->type;
         }
-        return NULL;
+        return type;
     }
     static std::vector<Field*> _repeat_struct_field(
         std::vector<Field*> fields) {
@@ -123,7 +120,7 @@ struct visitor {
             for (auto field : fields) {
                 auto entry = new Entry(field);
                 insert(entry);
-                irs.push_back(trans_dec(entry));
+                irs = extend(irs, trans_dec(entry));
             }
             return irs;
         } else if (self->rule == 2) {
@@ -160,7 +157,7 @@ struct visitor {
         IRList irs;
         enter(ret_type);
         for (auto param : params) {
-            auto entry = new Entry(param);
+            auto entry = new Entry(param, false);
             insert(entry);
             irs.push_back(IR{IRType::PARAM, {entry->name()}});
         }
@@ -293,7 +290,7 @@ struct visitor {
                     irs = _if_stmt(irs, t, "!=", "#0", lb_t, lb_f);
                 } else if (relation_op.find(c[1]->type) != relation_op.end()) {
                     auto it = relation_op.find(c[1]->type);
-                    irs = _if_stmt(irs, t_1, it->second, t_2, lb_t, lb_f, t);
+                    irs = _if_stmt(irs, t_1, it->second, t_2, lb_t, lb_f);
                 }
                 return {new Field{"RValue", new Type(*oprand_1->type),
                                   self->lineno},
@@ -477,7 +474,8 @@ struct visitor {
                 irs = extend(irs, irs_1);
                 for (auto arg = arguments.rbegin(); arg != arguments.rend();
                      arg++) {
-                    if (arg->first->type->category != Category::PRIMITIVE) {
+                    if (arg->first->type->category != Category::PRIMITIVE &&
+                        arg->second[0] == 'd') {
                         irs.push_back(IR{IRType::ARG, {arg->second.substr(2)}});
                     } else {
                         irs.push_back(IR{IRType::ARG, {arg->second}});
@@ -510,6 +508,7 @@ struct visitor {
                 if (t_1.at(0) == 'd')
                     t_1 = t_1.substr(2);
                 irs = extend(irs, irs_1);
+                irs = extend(irs, irs_2);
                 auto ret = temp_pointer(), t_idx = temp_var();
                 auto val = "d_" + ret;
                 int arr_size = _type_size(arr->base);
@@ -681,11 +680,11 @@ struct visitor {
             auto [vars, irs] = def(self->children[0]);
             for (int i = 0; i < vars.size(); i++) {
                 auto [field, t] = vars[i];
-                head = {field};
+                head.push_back(field);
                 if (insert_now) {
                     auto entry = new Entry(field);
                     insert(entry);
-                    irs.push_back(trans_dec(entry));
+                    irs = extend(irs, trans_dec(entry));
                     if (t != "") {
                         irs.push_back(IR{IRType::ASSIGN, {entry->name(), t}});
                     }
@@ -759,6 +758,10 @@ struct visitor {
         }
         return new Type((Primitive)self->type);
     }
-    static std::string id(NODE* self) { return self->node_val; }
+    static std::string id(NODE* self) {
+        if (self->node_val == NULL)
+            return "";
+        return self->node_val;
+    }
     static int _int(NODE* self) { return strtol(self->node_val, NULL, 10); }
 };

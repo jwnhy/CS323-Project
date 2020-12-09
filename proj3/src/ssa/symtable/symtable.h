@@ -19,11 +19,13 @@ struct Entry {
         Field* field;
         Func* func;
     };
-    Entry(Field* field)
+    bool ref;
+    Entry(Field* field, bool ref = true)
         : field(field),
           lineno(field->lineno),
           entry_type(EntryType::FIELD),
-          id(CNT++) {}
+          id(CNT++),
+          ref(ref) {}
     Entry(Func* func, int lineno)
         : func(func), lineno(lineno), entry_type(EntryType::FUNC), id(CNT++) {}
     Entry(Type* type, int lineno)
@@ -40,13 +42,17 @@ struct Entry {
             return "";
     }
     std::string name() {
-        if (this->entry_type == EntryType::FIELD)
-            return "v" + this->field->name + "_" + std::to_string(id);
-        else if (this->entry_type == EntryType::FUNC)
-            return "v" + this->func->name + "_" + std::to_string(id);
+        if (this->entry_type == EntryType::FIELD) {
+            if (this->field->type->category != Category::PRIMITIVE && this->ref)
+                return "&v_" + this->field->name + "_" + std::to_string(id);
+            else
+                return "v_" + this->field->name + "_" + std::to_string(id);
+        } else if (this->entry_type == EntryType::FUNC)
+            return "v_" + this->func->name + "_" + std::to_string(id);
         else if (this->entry_type == EntryType::TYPE &&
                  this->type->category == Category::STRUCT)
-            return "v" + this->type->structure->name + "_" + std::to_string(id);
+            return "v_" + this->type->structure->name + "_" +
+                   std::to_string(id);
         else
             return "";
     }

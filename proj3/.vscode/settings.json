@@ -81,6 +81,7 @@
         "queue": "cpp",
         "stack": "cpp",
         "cstdbool": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "*.ipp": "cpp"
     }
 }

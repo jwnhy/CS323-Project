@@ -39,8 +39,9 @@ int QuickSort(int c[8], int low1, int high1)
  
 int main()
 {
+        int arr[8];
+
     int n = 8;
-    int arr[8];
     int i = 0;
     while(i < n)
     {

@@ -7,6 +7,7 @@ typedef std::vector<IR> IRList;
 enum class IRType {
     LABEL,
     FUNCTION,
+    PARAM,
     ASSIGN,
     ADD,
     SUB,
@@ -19,12 +20,14 @@ enum class IRType {
     IF,
     RET,
     ALLOC,
-    PARAM,
     ARG,
     CALL,
     READ,
     WRITE,
+    NIR,
 };
+IRList extend(IRList irs_a, IRList irs_b);
+std::string to_str(IRType type);
 struct IR {
     IRType type;
     std::vector<std::string> args;

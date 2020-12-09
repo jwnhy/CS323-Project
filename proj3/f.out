@@ -1,9 +1,0 @@
-FUNCTION main :
-vb_1 := #0
-vb_1 := #0
-DEC va_2 32
-t_8 := #4 * #0
-p_7 := va_2 + t_8
-d_p_7 := *p_7
-*p_7 := #1
-RETURN #0

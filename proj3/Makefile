@@ -16,7 +16,7 @@ splbin=bin/splc
 
 sppsrc=$(sppfolder)/spp.cpp
 
-ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp $(ssafolder)/ir/*.cpp
+ssasrc=$(ssafolder)/symtable/*.cpp $(ssafolder)/ssa.cpp $(ssafolder)/ir/*.cpp $(ssafolder)/cfg/*.cpp $(ssafolder)/dag/*.cpp
 .lex: $(spll)
 	-@mkdir obj ||:
 	-@mkdir $(splfolder)/gen ||:

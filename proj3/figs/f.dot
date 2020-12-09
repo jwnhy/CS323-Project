@@ -1,0 +1,55 @@
+digraph {subgraph cluster_0 {BLOCK_0 [label="FUNCTION mod :
+PARAM v_x_1
+PARAM v_n_2
+t_7 := v_x_1 / v_n_2
+t_8 := t_7 * v_n_2
+t_9 := v_x_1 - t_8
+RETURN t_9
+"]
+}subgraph cluster_1 {BLOCK_1 [label="FUNCTION DigitSum :
+PARAM v_y_11
+IF v_y_11 == #0 GOTO l_12
+"]
+BLOCK_2 [label="GOTO l_13
+"]
+BLOCK_3 [label="LABEL l_12 :
+RETURN #0
+"]
+BLOCK_4 [label="LABEL l_13 :
+ARG #10
+ARG v_y_11
+t_25 := CALL mod
+t_26 := v_y_11 / #10
+ARG t_26
+t_27 := CALL DigitSum
+t_28 := t_25 + t_27
+RETURN t_28
+"]
+BLOCK_1 -> BLOCK_3;
+BLOCK_1 -> BLOCK_2;
+BLOCK_2 -> BLOCK_4;
+}subgraph cluster_2 {BLOCK_5 [label="FUNCTION main :
+READ v_num_30
+IF v_num_30 < #0 GOTO l_36
+"]
+BLOCK_6 [label="GOTO l_37
+"]
+BLOCK_7 [label="LABEL l_36 :
+t_45 := #0 - #1
+WRITE t_45
+GOTO l_38
+"]
+BLOCK_8 [label="LABEL l_37 :
+ARG v_num_30
+t_50 := CALL DigitSum
+WRITE t_50
+"]
+BLOCK_9 [label="LABEL l_38 :
+RETURN #0
+"]
+BLOCK_5 -> BLOCK_7;
+BLOCK_5 -> BLOCK_6;
+BLOCK_6 -> BLOCK_8;
+BLOCK_7 -> BLOCK_9;
+BLOCK_8 -> BLOCK_9;
+}}
